@@ -157,6 +157,7 @@ relation_extension(Relation, KB, Result) :-
 %-----------------------------------
 %		Punto 2
 %-----------------------------------
+% Inciso a
 % Predicado para añadir una nueva clase a la base de conocimientos
 add_class(NombreClase, ClaseMadre, KB, NuevaKB) :-
     append(KB, [class(NombreClase, ClaseMadre, [], [], [])], NuevaKB).
@@ -167,6 +168,7 @@ add_object(NombreObjeto, NombreClase, KB, NuevaKB) :-
     append(Objetos, [[id=>NombreObjeto, [], []]], NuevosObjetos),
     append(KBRestante, [class(NombreClase, ClaseMadre, Propiedades, Relaciones, NuevosObjetos)], NuevaKB).
 
+% Inciso b
 % Predicado para añadir una propiedad a una clase en la base de conocimientos
 add_class_property(NombreClase, Propiedad, Valor, KB, NuevaKB) :-
     select(class(NombreClase, ClaseMadre, Propiedades, Relaciones, Objetos), KB, KBRestante),
@@ -184,6 +186,7 @@ add_object_property(NombreClase, NombreObjeto, Propiedad, Valor, KB, NuevaKB) :-
         Objetos, NuevosObjetos),
     append(KBRestante, [class(NombreClase, ClaseMadre, Propiedades, Relaciones, NuevosObjetos)], NuevaKB).
 
+% Inciso c
 % Predicado para añadir una relación a una clase en la base de conocimientos
 add_class_relation(NombreClase, Relacion, ClasesRelacionadas, KB, NuevaKB) :-
     select(class(NombreClase, ClaseMadre, Propiedades, Relaciones, Objetos), KB, KBRestante),
