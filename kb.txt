@@ -1,0 +1,13 @@
+[
+    class(top, none, [], [], []),
+    class(aves, top, [vuelan], [], []),
+    class(peces, top, [nadan], [], []),
+    class(mamiferos, top, [], [], []),
+    class(aguilas, aves, [vuelan], [], [[id=>pedro, [tam=>'-'], []]]),
+    class(pinguinos, aves, [not(vuelan)], [], [[id=>arturo, [], [amigo=>pedro]]]),
+    class(reptiles, top, [reptan], [], []),
+    class(serpientes, reptiles, [], [], [[id=>cobra, [venenosa=>si], []]]),
+    class(tortugas, reptiles, [], [], [[id=>leonardo, [edad=>100], []]]),
+    class(felinos, mamiferos, [cazan], [], [[id=>tigre, [color=>naranja], []]]),
+    class(caninos, mamiferos, [], [], [[id=>perro, [amigo=>humano], []]])
+]
