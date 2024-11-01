@@ -157,6 +157,50 @@ relation_extension(Relation, KB, Result) :-
 %-----------------------------------
 %		Punto 2
 %-----------------------------------
+% Predicado para añadir una nueva clase a la base de conocimientos
+add_class(NombreClase, ClaseMadre, KB, NuevaKB) :-
+    append(KB, [class(NombreClase, ClaseMadre, [], [], [])], NuevaKB).
+
+% Predicado para añadir un nuevo objeto a una clase específica en la base de conocimientos
+add_object(NombreObjeto, NombreClase, KB, NuevaKB) :-
+    select(class(NombreClase, ClaseMadre, Propiedades, Relaciones, Objetos), KB, KBRestante),
+    append(Objetos, [[id=>NombreObjeto, [], []]], NuevosObjetos),
+    append(KBRestante, [class(NombreClase, ClaseMadre, Propiedades, Relaciones, NuevosObjetos)], NuevaKB).
+
+% Predicado para añadir una propiedad a una clase en la base de conocimientos
+add_class_property(NombreClase, Propiedad, Valor, KB, NuevaKB) :-
+    select(class(NombreClase, ClaseMadre, Propiedades, Relaciones, Objetos), KB, KBRestante),
+    append(Propiedades, [Propiedad=>Valor], NuevasPropiedades),
+    append(KBRestante, [class(NombreClase, ClaseMadre, NuevasPropiedades, Relaciones, Objetos)], NuevaKB).
+
+% Predicado para añadir una propiedad a un objeto dentro de una clase
+add_object_property(NombreClase, NombreObjeto, Propiedad, Valor, KB, NuevaKB) :-
+    select(class(NombreClase, ClaseMadre, Propiedades, Relaciones, Objetos), KB, KBRestante),
+    % Encuentra y modifica el objeto específico
+    maplist(
+        ( [id=>NombreObjeto, PropiedadesObjeto, RelacionesObjeto] >> 
+            (append(PropiedadesObjeto, [Propiedad=>Valor], NuevasPropiedadesObjeto),
+             [id=>NombreObjeto, NuevasPropiedadesObjeto, RelacionesObjeto]) ),
+        Objetos, NuevosObjetos),
+    append(KBRestante, [class(NombreClase, ClaseMadre, Propiedades, Relaciones, NuevosObjetos)], NuevaKB).
+
+% Predicado para añadir una relación a una clase en la base de conocimientos
+add_class_relation(NombreClase, Relacion, ClasesRelacionadas, KB, NuevaKB) :-
+    select(class(NombreClase, ClaseMadre, Propiedades, Relaciones, Objetos), KB, KBRestante),
+    append(Relaciones, [Relacion=>ClasesRelacionadas], NuevasRelaciones),
+    append(KBRestante, [class(NombreClase, ClaseMadre, Propiedades, NuevasRelaciones, Objetos)], NuevaKB).
+
+% Predicado para añadir una relación a un objeto dentro de una clase
+add_object_relation(NombreClase, NombreObjeto, Relacion, ObjetosRelacionados, KB, NuevaKB) :-
+    select(class(NombreClase, ClaseMadre, Propiedades, Relaciones, Objetos), KB, KBRestante),
+    maplist(
+        ( [id=>NombreObjeto, PropiedadesObjeto, RelacionesObjeto] >> 
+            (append(RelacionesObjeto, [Relacion=>ObjetosRelacionados], NuevasRelacionesObjeto),
+             [id=>NombreObjeto, PropiedadesObjeto, NuevasRelacionesObjeto]) ),
+        Objetos, NuevosObjetos),
+    append(KBRestante, [class(NombreClase, ClaseMadre, Propiedades, Relaciones, NuevosObjetos)], NuevaKB).
+
+
 %-----------------------------------
 %		Punto 3
 %-----------------------------------
