@@ -154,6 +154,185 @@ relation_extension(Relation, KB, Result) :-
     ),
     % Eliminar duplicados dejando solo la primera ocurrencia
     sort(ResultUnfiltered, Result).
+
+%inciso d)
+% Predicado principal para encontrar todas las clases a las que pertenece un objeto
+classes_of_individual(Object, KB, Classes) :-
+    findall(
+        Class,
+        (
+            member(class(Class, _, _, _, Instances), KB),
+            member([id=>Object | _], Instances)
+        ),
+        DirectClasses
+    ),
+    find_superclasses_list(DirectClasses, KB, AllClasses),
+    % Eliminar duplicados y devolver la lista final
+    sort(AllClasses, Classes).
+
+% Predicado auxiliar para encontrar las superclases de una lista de clases
+find_superclasses_list([], _, []).
+find_superclasses_list([Class | Rest], KB, [Class | SuperClasses]) :-
+    find_superclasses(Class, KB, ClassSuperClasses),
+    find_superclasses_list(Rest, KB, RestSuperClasses),
+    append(ClassSuperClasses, RestSuperClasses, SuperClasses),
+    !. % Corte para evitar que siga buscando soluciones
+
+% Predicado auxiliar para encontrar las superclases de una clase de forma recursiva
+find_superclasses(Class, KB, SuperClasses) :-
+    member(class(Class, SuperClass, _, _, _), KB),
+    SuperClass \= none,
+    find_superclasses(SuperClass, KB, ParentSuperClasses),
+    SuperClasses = [SuperClass | ParentSuperClasses].
+
+find_superclasses(_, _, []).
+
+%inciso e)
+% Predicado principal para encontrar todas las propiedades de un objeto
+properties_of_individual(Object, KB, Properties) :-
+    findall(
+        Property:Value,
+        (
+            member(class(_, _, _, _, Instances), KB),
+            member([id=>Object, Attributes, _], Instances),
+            member(Property=>Value, Attributes),
+            ! % Corte para detener la búsqueda de más soluciones una vez encontrada una propiedad
+        ),
+        DirectProperties
+    ),
+    classes_of_individual_e(Object, KB, Classes),
+    find_inherited_properties(Classes, KB, InheritedProperties),
+    append(DirectProperties, InheritedProperties, AllProperties),
+    sort(AllProperties, Properties), % Elimina duplicados y ordena
+    !. % Corte para detener la búsqueda después de obtener el resultado final
+
+% Predicado para encontrar todas las propiedades de una clase
+class_properties(Class, KB, Properties) :-
+    findall(
+        Property,
+        (
+            member(class(Class, _, ClassProperties, _, _), KB),
+            member(Property, ClassProperties),
+            ! % Corte para detener la búsqueda de más soluciones
+        ),
+        DirectProperties
+    ),
+    find_superclasses_e(Class, KB, SuperClasses),
+    find_inherited_properties(SuperClasses, KB, InheritedProperties),
+    append(DirectProperties, InheritedProperties, AllProperties),
+    sort(AllProperties, Properties), % Elimina duplicados y ordena
+    !. % Corte para finalizar la búsqueda
+
+% Predicado auxiliar para encontrar las propiedades heredadas de una lista de clases
+find_inherited_properties([], _, []).
+find_inherited_properties([Class | Rest], KB, Properties) :-
+    class_properties(Class, KB, ClassProperties),
+    find_inherited_properties(Rest, KB, RestProperties),
+    append(ClassProperties, RestProperties, Properties),
+    !. % Corte para evitar seguir buscando
+
+% Predicado para encontrar todas las clases a las que pertenece un objeto
+classes_of_individual_e(Object, KB, Classes) :-
+    findall(
+        Class,
+        (
+            member(class(Class, _, _, _, Instances), KB),
+            member([id=>Object | _], Instances),
+            ! % Corte para detener la búsqueda de más soluciones
+        ),
+        DirectClasses
+    ),
+    find_superclasses_list_e(DirectClasses, KB, AllClasses),
+    sort(AllClasses, Classes), % Elimina duplicados y ordena
+    !. % Corte para finalizar la búsqueda
+
+% Predicado auxiliar para encontrar las superclases de una lista de clases
+find_superclasses_list_e([], _, []).
+find_superclasses_list_e([Class | Rest], KB, [Class | SuperClasses]) :-
+    find_superclasses_e(Class, KB, ClassSuperClasses),
+    find_superclasses_list_e(Rest, KB, RestSuperClasses),
+    append(ClassSuperClasses, RestSuperClasses, SuperClasses),
+    !. % Corte para evitar seguir buscando
+
+% Predicado auxiliar para encontrar las superclases de una clase de forma recursiva
+find_superclasses_e(Class, KB, SuperClasses) :-
+    member(class(Class, SuperClass, _, _, _), KB),
+    SuperClass \= none,
+    find_superclasses_e(SuperClass, KB, ParentSuperClasses),
+    SuperClasses = [SuperClass | ParentSuperClasses],
+    !. % Corte para evitar seguir buscando
+
+find_superclasses_e(_, _, []).
+
+%inciso e)
+% Predicado principal para encontrar todas las relaciones de un objeto
+% Regla para encontrar las relaciones específicas de un individuo en la base de conocimientos.
+relations_of_individual(Individual, KB, Relations) :-
+    findall(
+        Property,
+        (
+            member(class(_, _, _, _, Properties), KB),
+            member([id=>Individual | Props], Properties),
+            member(Property, Props)
+        ),
+        Relations
+    ).
+
+
+% Predicado para encontrar todas las relaciones de una clase
+% Define la regla para encontrar todas las subclases de una clase dada.
+class_relations(Class, KB, Relations) :-
+    findall(
+        Subclass,
+        (member(class(Subclass, Class, _, _, _), KB)),
+        DirectRelations
+    ),
+    findall(
+        SubSubclass,
+        (member(class(SubSubclass, SubclassRelation, _, _, _), KB), 
+         member(class(SubclassRelation, Class, _, _, _), KB)),
+        IndirectRelations
+    ),
+    append(DirectRelations, IndirectRelations, Relations).
+
+
+% Predicado auxiliar para encontrar relaciones heredadas de una lista de clases
+find_inherited_relations_f([], _, []).
+find_inherited_relations_f([Class | Rest], KB, Relations) :-
+    class_relations(Class, KB, ClassRelations),
+    find_inherited_relations_f(Rest, KB, RestRelations),
+    append(ClassRelations, RestRelations, Relations).
+
+% Predicado para encontrar todas las clases a las que pertenece un objeto
+classes_of_individual_f(Object, KB, Classes) :-
+    findall(
+        Class,
+        (
+            member(class(Class, _, _, _, Instances), KB),
+            member([id=>Object | _], Instances)
+        ),
+        DirectClasses
+    ),
+    find_superclasses_list_f(DirectClasses, KB, AllClasses),
+    sort(AllClasses, Classes). % Elimina duplicados y ordena
+
+% Predicado auxiliar para encontrar las superclases de una lista de clases
+find_superclasses_list_f([], _, []).
+find_superclasses_list_f([Class | Rest], KB, [Class | SuperClasses]) :-
+    find_superclasses_f(Class, KB, ClassSuperClasses),
+    find_superclasses_list_f(Rest, KB, RestSuperClasses),
+    append(ClassSuperClasses, RestSuperClasses, SuperClasses),
+    !. % Corte para evitar seguir buscando
+
+% Predicado auxiliar para encontrar las superclases de una clase de forma recursiva
+find_superclasses_f(Class, KB, SuperClasses) :-
+    member(class(Class, SuperClass, _, _, _), KB),
+    SuperClass \= none,
+    find_superclasses_f(SuperClass, KB, ParentSuperClasses),
+    SuperClasses = [SuperClass | ParentSuperClasses],
+    !. % Corte para evitar seguir buscando
+
+find_superclasses_f(_, _, []).
 %-----------------------------------
 %		Punto 2
 %-----------------------------------
