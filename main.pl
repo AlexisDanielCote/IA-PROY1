@@ -79,6 +79,9 @@ format_indv_kb([Obj|More],Stream):-
 ejemplo:-
 	open_kb('kb.txt',KB),	write('KB: '),	write(KB),	save_kb('new_kb.txt',KB).
 
+%-----------------------------------
+%		Punto 1
+%-----------------------------------
 % (a) Extensión de una clase
 % Predicado para encontrar la extensión de una clase y sus subclases.
 class_extension(ClassName, KnowledgeBase, Extension) :-
@@ -151,4 +154,12 @@ relation_extension(Relation, KB, Result) :-
     ),
     % Eliminar duplicados dejando solo la primera ocurrencia
     sort(ResultUnfiltered, Result).
-
+%-----------------------------------
+%		Punto 2
+%-----------------------------------
+%-----------------------------------
+%		Punto 3
+%-----------------------------------
+%-----------------------------------
+%		Punto 4
+%-----------------------------------
