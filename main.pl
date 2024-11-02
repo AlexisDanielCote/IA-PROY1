@@ -389,3 +389,72 @@ add_object_relation(NombreClase, NombreObjeto, Relacion, ObjetosRelacionados, KB
 %-----------------------------------
 %		Punto 4
 %-----------------------------------
+% Inciso a
+% Modificar el nombre de una clase
+% Predicado para cambiar el nombre de una clase
+change_class_name(NombreClaseActual, NuevoNombreClase, KB, NuevaKB) :-
+    select(class(NombreClaseActual, ClaseMadre, Propiedades, Relaciones, Objetos), KB, KBRestante),
+    append(KBRestante, [class(NuevoNombreClase, ClaseMadre, Propiedades, Relaciones, Objetos)], NuevaKB).
+
+% Modificar el nombre de un objeto
+% Predicado para cambiar el nombre de un objeto dentro de una clase
+change_object_name(NombreClase, NombreObjetoActual, NuevoNombreObjeto, KB, NuevaKB) :-
+    select(class(NombreClase, ClaseMadre, Propiedades, Relaciones, Objetos), KB, KBRestante),
+    maplist(
+        ({NombreObjetoActual, NuevoNombreObjeto}/[Objeto, ObjetoModificado]>>
+            (Objeto = [id=>NombreObjetoActual, PropiedadesObjeto, RelacionesObjeto] ->
+             ObjetoModificado = [id=>NuevoNombreObjeto, PropiedadesObjeto, RelacionesObjeto] ;
+             ObjetoModificado = Objeto)),
+        Objetos, NuevosObjetos),
+    append(KBRestante, [class(NombreClase, ClaseMadre, Propiedades, Relaciones, NuevosObjetos)], NuevaKB).
+
+% Inciso b
+% Predicado para modificar el valor de una propiedad específica de una clase
+change_value_class_property(NombreClase, Propiedad, NuevoValor, KB, NuevaKB) :-
+    select(class(NombreClase, ClaseMadre, Propiedades, Relaciones, Objetos), KB, KBRestante),
+    maplist(
+        ({Propiedad, NuevoValor}/[PropiedadActual=>ValorActual, PropiedadActual=>ValorModificado]>>
+            ( (PropiedadActual == Propiedad) -> ValorModificado=NuevoValor ; ValorModificado=ValorActual )),
+        Propiedades, NuevasPropiedades),
+    append(KBRestante, [class(NombreClase, ClaseMadre, NuevasPropiedades, Relaciones, Objetos)], NuevaKB).
+
+% Predicado para modificar el valor de una propiedad específica de un objeto dentro de una clase
+change_value_object_property(NombreClase, NombreObjeto, Propiedad, NuevoValor, KB, NuevaKB) :-
+    select(class(NombreClase, ClaseMadre, Propiedades, Relaciones, Objetos), KB, KBRestante),
+    maplist(
+        ({NombreObjeto, Propiedad, NuevoValor}/[Objeto, ObjetoModificado]>>
+            (Objeto = [id=>NombreObjeto, PropiedadesObjeto, RelacionesObjeto] ->
+             maplist(
+                ({Propiedad, NuevoValor}/[PropiedadActual=>ValorActual, PropiedadActual=>ValorModificado]>>
+                    ( (PropiedadActual == Propiedad) -> ValorModificado=NuevoValor ; ValorModificado=ValorActual )),
+                PropiedadesObjeto, NuevasPropiedadesObjeto),
+             ObjetoModificado = [id=>NombreObjeto, NuevasPropiedadesObjeto, RelacionesObjeto] ;
+             ObjetoModificado = Objeto)),
+        Objetos, NuevosObjetos),
+    append(KBRestante, [class(NombreClase, ClaseMadre, Propiedades, Relaciones, NuevosObjetos)], NuevaKB).
+
+% Inciso c
+% Predicado para modificar una relación específica de una clase
+change_value_class_relation(NombreClase, Relacion, NuevasClasesRelacionadas, KB, NuevaKB) :-
+    select(class(NombreClase, ClaseMadre, Propiedades, Relaciones, Objetos), KB, KBRestante),
+    maplist(
+        ({Relacion, NuevasClasesRelacionadas}/[RelacionActual=>RelacionadosActuales, RelacionActual=>RelacionModificada]>>
+            ( (RelacionActual == Relacion) -> RelacionModificada=NuevasClasesRelacionadas ; RelacionModificada=RelacionadosActuales )),
+        Relaciones, NuevasRelaciones),
+    append(KBRestante, [class(NombreClase, ClaseMadre, Propiedades, NuevasRelaciones, Objetos)], NuevaKB).
+
+% Predicado para modificar una relación específica de un objeto dentro de una clase
+change_value_object_relation(NombreClase, NombreObjeto, Relacion, NuevosObjetosRelacionados, KB, NuevaKB) :-
+    select(class(NombreClase, ClaseMadre, Propiedades, Relaciones, Objetos), KB, KBRestante),
+    maplist(
+        ({NombreObjeto, Relacion, NuevosObjetosRelacionados}/[Objeto, ObjetoModificado]>>
+            (Objeto = [id=>NombreObjeto, PropiedadesObjeto, RelacionesObjeto] ->
+             maplist(
+                ({Relacion, NuevosObjetosRelacionados}/[RelacionActual=>RelacionadosActuales, RelacionActual=>RelacionModificada]>>
+                    ( (RelacionActual == Relacion) -> RelacionModificada=NuevosObjetosRelacionados ; RelacionModificada=RelacionadosActuales )),
+                RelacionesObjeto, NuevasRelacionesObjeto),
+             ObjetoModificado = [id=>NombreObjeto, PropiedadesObjeto, NuevasRelacionesObjeto] ;
+             ObjetoModificado = Objeto)),
+        Objetos, NuevosObjetos),
+    append(KBRestante, [class(NombreClase, ClaseMadre, Propiedades, Relaciones, NuevosObjetos)], NuevaKB).
+
