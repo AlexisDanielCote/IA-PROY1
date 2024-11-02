@@ -342,15 +342,35 @@ find_superclasses_f(_, _, []).
 %		Punto 2
 %-----------------------------------
 % Inciso a
-% Predicado para añadir una nueva clase a la base de conocimientos
+% Predicado para añadir una clase si no existe en la base de conocimientos
 add_class(NombreClase, ClaseMadre, KB, NuevaKB) :-
-    append(KB, [class(NombreClase, ClaseMadre, [], [], [])], NuevaKB).
+    % Verificar si la clase ya existe en la base de conocimientos
+    (member(class(NombreClase, _, _, _, _), KB) ->
+        % Si ya existe, mostrar mensaje y no cambiar la base de conocimientos
+        write('La clase ya existe y no se puede duplicar.'), nl,
+        NuevaKB = KB ;
+        % Si no existe, agregar la clase a la base de conocimientos y mostrar el resultado
+        append(KB, [class(NombreClase, ClaseMadre, [], [], [])], NuevaKB),
+        write('Clase agregada exitosamente.'), nl,
+        write('Nueva base de conocimientos:'), nl,
+        write('new_kb.txt', KB), nl
+    ).
 
-% Predicado para añadir un nuevo objeto a una clase específica en la base de conocimientos
-add_object(NombreObjeto, NombreClase, KB, NuevaKB) :-
-    select(class(NombreClase, ClaseMadre, Propiedades, Relaciones, Objetos), KB, KBRestante),
-    append(Objetos, [[id=>NombreObjeto, [], []]], NuevosObjetos),
-    append(KBRestante, [class(NombreClase, ClaseMadre, Propiedades, Relaciones, NuevosObjetos)], NuevaKB).
+add_object(NombreObjeto, ClaseNombre, KB, NuevaKB) :-
+    % Verificar si la clase existe en la base de conocimientos
+    (member(class(ClaseNombre, ClaseMadre, Props, Relaciones, Objetos), KB) ->
+        % Si la clase existe, agregar el objeto a su lista de objetos
+        select(class(ClaseNombre, ClaseMadre, Props, Relaciones, Objetos), KB, TempKB),
+        append(Objetos, [[id=>NombreObjeto, [], []]], NuevaListaObjetos),
+        append(TempKB, [class(ClaseNombre, ClaseMadre, Props, Relaciones, NuevaListaObjetos)], NuevaKB),
+        write('Objeto agregado exitosamente.'), nl,
+        write('Nueva base de conocimientos:'), nl,
+        write(NuevaKB), nl
+    ;
+        % Si la clase no existe, mostrar mensaje y no hacer cambios
+        write('La clase especificada no existe en la base de conocimientos.'), nl,
+        NuevaKB = KB
+    ).
 
 % Inciso b
 % Predicado para añadir una propiedad a una clase en la base de conocimientos
