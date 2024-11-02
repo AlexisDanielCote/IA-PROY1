@@ -5,7 +5,7 @@
 
 %KB open and save
 
-open_kb(Route,KB):-     
+open_kb(Route,KB):-
 	open(Route,read,Stream),
 	readclauses(Stream,X),
 	close(Stream),
@@ -78,6 +78,8 @@ format_indv_kb([Obj|More],Stream):-
 
 ejemplo:-
 	open_kb('kb.txt',KB),	write('KB: '),	write(KB),	save_kb('new_kb.txt',KB).
+
+
 
 %-----------------------------------
 %		Punto 1
@@ -264,7 +266,7 @@ find_superclasses_e(Class, KB, SuperClasses) :-
 
 find_superclasses_e(_, _, []).
 
-%inciso e)
+%inciso f)
 % Predicado principal para encontrar todas las relaciones de un objeto
 % Regla para encontrar las relaciones específicas de un individuo en la base de conocimientos.
 relations_of_individual(Individual, KB, Relations) :-
@@ -333,6 +335,9 @@ find_superclasses_f(Class, KB, SuperClasses) :-
     !. % Corte para evitar seguir buscando
 
 find_superclasses_f(_, _, []).
+
+
+
 %-----------------------------------
 %		Punto 2
 %-----------------------------------
@@ -382,10 +387,109 @@ add_object_relation(NombreClase, NombreObjeto, Relacion, ObjetosRelacionados, KB
         Objetos, NuevosObjetos),
     append(KBRestante, [class(NombreClase, ClaseMadre, Propiedades, Relaciones, NuevosObjetos)], NuevaKB).
 
-
 %-----------------------------------
 %		Punto 3
 %-----------------------------------
+%inciso a)
+% Predicado para eliminar una clase de la base de conocimientos
+rm_class(ClassName, CurrentKB, NewKB) :-
+    exclude(is_exact_class(ClassName), CurrentKB, NewKB).
+
+is_exact_class(ClassName, class(ClassName, _, _, _, _)).
+
+% Predicado para eliminar un objeto de la base de conocimientos
+rm_object(ObjectID, CurrentKB, NewKB) :-
+    maplist(remove_object_from_class(ObjectID), CurrentKB, UpdatedKB),
+    exclude(is_empty_class, UpdatedKB, NewKB).
+
+remove_object_from_class(ObjectID, class(Name, Superclass, Properties, Relations, Objects), class(Name, Superclass, Properties, Relations, UpdatedObjects)) :-
+    exclude(has_id(ObjectID), Objects, UpdatedObjects).
+
+% Predicado para verificar si un objeto tiene un identificador específico con el formato id=>ObjectID
+has_id(ObjectID, id=>ObjectID).
+
+% Predicado para verificar si una clase está vacía (sin objetos)
+is_empty_class(class(_, _, _, _, Objects)) :-
+    Objects == [].
+
+
+
+%inciso b
+% Predicado para eliminar una propiedad específica de una clase
+rm_class_property(ClassName, Property, CurrentKB, NewKB) :-
+    maplist(remove_class_property(ClassName, Property), CurrentKB, UpdatedKB),
+    NewKB = UpdatedKB.
+
+remove_class_property(ClassName, Property, class(Name, Superclass, Properties, Relations, Objects), class(Name, Superclass, UpdatedProperties, Relations, Objects)) :-
+    (Name == ClassName ->
+        exclude(==(Property), Properties, UpdatedProperties)
+    ;
+        UpdatedProperties = Properties
+    ).
+
+% Predicado para eliminar una propiedad específica de un objeto
+rm_object_property(ObjectID, Property, CurrentKB, NewKB) :-
+    maplist(remove_object_property_from_class(ObjectID, Property), CurrentKB, NewKB).
+
+remove_object_property_from_class(ObjectID, Property, class(Name, Superclass, Properties, Relations, Objects), class(Name, Superclass, Properties, Relations, UpdatedObjects)) :-
+    maplist(remove_property_from_object(ObjectID, Property), Objects, UpdatedObjects).
+
+% Predicado para eliminar una propiedad específica de un objeto
+remove_property_from_object(ObjectID, Property, Object, UpdatedObject) :-
+    (Object =.. [id=>ObjectID | Props] ->
+        exclude(==(Property), Props, UpdatedProps),
+        UpdatedObject =.. [id=>ObjectID | UpdatedProps]
+    ;
+        UpdatedObject = Object
+    ).
+
+%Inciso c)
+% Remove a relation from a class and maintain the order
+rm_class_relation(ClassName, Relation, KB, NewKB) :-
+    write('Buscando la clase: '), write(ClassName), nl,
+    select(class(ClassName, Parent, Methods, Properties, Instances), KB, RestKB),
+    write('Clase encontrada. Eliminando la relación: '), write(Relation), nl,
+    (member(Relation, Methods) ->
+        delete(Methods, Relation, NewMethods),
+        NewClass = class(ClassName, Parent, NewMethods, Properties, Instances),
+        append(RestKB, [NewClass], OrderedKB),
+        write('Clase modificada: '), write(NewClass), nl,
+        NewKB = OrderedKB,  % Mantener el orden original de la base de conocimientos
+        !
+    ;
+        write('La relación no se encontró en la clase.'), nl,
+        NewKB = KB
+    ).
+
+% Remove a relation from an object within a class and maintain the order
+rm_object_relation(ObjectName, Relation, KB, NewKB) :-
+    write('Buscando la clase que contiene el objeto: '), write(ObjectName), nl,
+    select(class(ClassName, Parent, Methods, Properties, Instances), KB, RestKB),
+    write('Clase encontrada: '), write(ClassName), nl,
+    % Verificar si hay una instancia con el formato id=>ObjectName
+    (member(id=>ObjectName, Instances) ->
+        write('Objeto encontrado en la clase: '), write(ObjectName), nl,
+        % Buscar y modificar la relación de las propiedades
+        (select(mimic=>yes, Instances, UpdatedInstances) ->
+            write('Relación encontrada y eliminada: '), write(Relation), nl,
+            % Reconstruir la clase con la instancia actualizada
+            NewClass = class(ClassName, Parent, Methods, Properties, UpdatedInstances),
+            append(RestKB, [NewClass], OrderedKB),
+            write('Clase modificada con objeto actualizado: '), write(NewClass), nl,
+            NewKB = OrderedKB,  % Mantener el orden original de la base de conocimientos
+            !
+        ;
+            write('La relación no se encontró en el objeto.'), nl,
+            NewKB = KB
+        )
+    ;
+    write('El objeto no fue encontrado en la clase.'), nl,
+    fail  % Si el objeto no se encuentra, falla para seguir buscando en otras clases
+    ).
+
+
+
+
 %-----------------------------------
 %		Punto 4
 %-----------------------------------
@@ -395,7 +499,6 @@ add_object_relation(NombreClase, NombreObjeto, Relacion, ObjetosRelacionados, KB
 change_class_name(NombreClaseActual, NuevoNombreClase, KB, NuevaKB) :-
     select(class(NombreClaseActual, ClaseMadre, Propiedades, Relaciones, Objetos), KB, KBRestante),
     append(KBRestante, [class(NuevoNombreClase, ClaseMadre, Propiedades, Relaciones, Objetos)], NuevaKB).
-
 % Modificar el nombre de un objeto
 % Predicado para cambiar el nombre de un objeto dentro de una clase
 change_object_name(NombreClase, NombreObjetoActual, NuevoNombreObjeto, KB, NuevaKB) :-
@@ -407,7 +510,6 @@ change_object_name(NombreClase, NombreObjetoActual, NuevoNombreObjeto, KB, Nueva
              ObjetoModificado = Objeto)),
         Objetos, NuevosObjetos),
     append(KBRestante, [class(NombreClase, ClaseMadre, Propiedades, Relaciones, NuevosObjetos)], NuevaKB).
-
 % Inciso b
 % Predicado para modificar el valor de una propiedad específica de una clase
 change_value_class_property(NombreClase, Propiedad, NuevoValor, KB, NuevaKB) :-
@@ -417,7 +519,6 @@ change_value_class_property(NombreClase, Propiedad, NuevoValor, KB, NuevaKB) :-
             ( (PropiedadActual == Propiedad) -> ValorModificado=NuevoValor ; ValorModificado=ValorActual )),
         Propiedades, NuevasPropiedades),
     append(KBRestante, [class(NombreClase, ClaseMadre, NuevasPropiedades, Relaciones, Objetos)], NuevaKB).
-
 % Predicado para modificar el valor de una propiedad específica de un objeto dentro de una clase
 change_value_object_property(NombreClase, NombreObjeto, Propiedad, NuevoValor, KB, NuevaKB) :-
     select(class(NombreClase, ClaseMadre, Propiedades, Relaciones, Objetos), KB, KBRestante),
@@ -432,7 +533,6 @@ change_value_object_property(NombreClase, NombreObjeto, Propiedad, NuevoValor, K
              ObjetoModificado = Objeto)),
         Objetos, NuevosObjetos),
     append(KBRestante, [class(NombreClase, ClaseMadre, Propiedades, Relaciones, NuevosObjetos)], NuevaKB).
-
 % Inciso c
 % Predicado para modificar una relación específica de una clase
 change_value_class_relation(NombreClase, Relacion, NuevasClasesRelacionadas, KB, NuevaKB) :-
@@ -442,7 +542,6 @@ change_value_class_relation(NombreClase, Relacion, NuevasClasesRelacionadas, KB,
             ( (RelacionActual == Relacion) -> RelacionModificada=NuevasClasesRelacionadas ; RelacionModificada=RelacionadosActuales )),
         Relaciones, NuevasRelaciones),
     append(KBRestante, [class(NombreClase, ClaseMadre, Propiedades, NuevasRelaciones, Objetos)], NuevaKB).
-
 % Predicado para modificar una relación específica de un objeto dentro de una clase
 change_value_object_relation(NombreClase, NombreObjeto, Relacion, NuevosObjetosRelacionados, KB, NuevaKB) :-
     select(class(NombreClase, ClaseMadre, Propiedades, Relaciones, Objetos), KB, KBRestante),
@@ -457,4 +556,3 @@ change_value_object_relation(NombreClase, NombreObjeto, Relacion, NuevosObjetosR
              ObjetoModificado = Objeto)),
         Objetos, NuevosObjetos),
     append(KBRestante, [class(NombreClase, ClaseMadre, Propiedades, Relaciones, NuevosObjetos)], NuevaKB).
-
