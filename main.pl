@@ -390,71 +390,101 @@ find_superclasses_f(_, _, []).
 %-----------------------------------
 %		Punto 2
 %-----------------------------------
-% Inciso a
-% Predicado para añadir una clase si no existe en la base de conocimientos
-add_class(NombreClase, ClaseMadre, KB, NuevaKB) :-
-    % Verificar si la clase ya existe en la base de conocimientos
-    (member(class(NombreClase, _, _, _, _), KB) ->
-        % Si ya existe, mostrar mensaje y no cambiar la base de conocimientos
+%--------------------------------------------------
+% Añadir Clases y Objetos
+%--------------------------------------------------
+
+% Añadir una clase
+add_class(ClaseNombre, ClaseMadre, KB, NuevaKB) :-
+    (member(class(ClaseNombre, _, _, _, _), KB) ->
         write('La clase ya existe y no se puede duplicar.'), nl,
-        NuevaKB = KB ;
-        % Si no existe, agregar la clase a la base de conocimientos y mostrar el resultado
-        append(KB, [class(NombreClase, ClaseMadre, [], [], [])], NuevaKB),
-        write('Clase agregada exitosamente.'), nl,
-        write('Nueva base de conocimientos:'), nl,
-        write('new_kb.txt', KB), nl
+        NuevaKB = KB
+    ;
+        append(KB, [class(ClaseNombre, ClaseMadre, [], [], [])], NuevaKB),
+        write('Clase agregada exitosamente.'), nl
     ).
 
+% Añadir un objeto
 add_object(NombreObjeto, ClaseNombre, KB, NuevaKB) :-
-    % Verificar si la clase existe en la base de conocimientos
     (member(class(ClaseNombre, ClaseMadre, Props, Relaciones, Objetos), KB) ->
-        % Si la clase existe, agregar el objeto a su lista de objetos
         select(class(ClaseNombre, ClaseMadre, Props, Relaciones, Objetos), KB, TempKB),
         append(Objetos, [[id=>NombreObjeto, [], []]], NuevaListaObjetos),
         append(TempKB, [class(ClaseNombre, ClaseMadre, Props, Relaciones, NuevaListaObjetos)], NuevaKB),
-        write('Objeto agregado exitosamente.'), nl,
-        write('Nueva base de conocimientos:'), nl,
-        write(NuevaKB), nl
+        write('Objeto agregado exitosamente.'), nl
     ;
-        % Si la clase no existe, mostrar mensaje y no hacer cambios
-        write('La clase especificada no existe en la base de conocimientos.'), nl,
+        write('La clase especificada no existe.'), nl,
         NuevaKB = KB
     ).
 
-% Inciso b
-% Predicado para añadir una propiedad a una clase en la base de conocimientos
-add_class_property(NombreClase, Propiedad, Valor, KB, NuevaKB) :-
-    select(class(NombreClase, ClaseMadre, Propiedades, Relaciones, Objetos), KB, KBRestante),
-    append(Propiedades, [Propiedad=>Valor], NuevasPropiedades),
-    append(KBRestante, [class(NombreClase, ClaseMadre, NuevasPropiedades, Relaciones, Objetos)], NuevaKB).
+%--------------------------------------------------
+% Añadir Propiedades
+%--------------------------------------------------
 
-% Predicado para añadir una propiedad a un objeto dentro de una clase
-add_object_property(NombreClase, NombreObjeto, Propiedad, Valor, KB, NuevaKB) :-
-    select(class(NombreClase, ClaseMadre, Propiedades, Relaciones, Objetos), KB, KBRestante),
-    % Encuentra y modifica el objeto específico
-    maplist(
-        ( [id=>NombreObjeto, PropiedadesObjeto, RelacionesObjeto] >> 
-            (append(PropiedadesObjeto, [Propiedad=>Valor], NuevasPropiedadesObjeto),
-             [id=>NombreObjeto, NuevasPropiedadesObjeto, RelacionesObjeto]) ),
-        Objetos, NuevosObjetos),
-    append(KBRestante, [class(NombreClase, ClaseMadre, Propiedades, Relaciones, NuevosObjetos)], NuevaKB).
+% Añadir una propiedad a una clase
+add_class_property(ClaseNombre, Propiedad, Valor, KB, NuevaKB) :-
+    (select(class(ClaseNombre, ClaseMadre, Props, Relaciones, Objetos), KB, TempKB) ->
+        append(Props, [[Propiedad => Valor]], NuevasProps),
+        append(TempKB, [class(ClaseNombre, ClaseMadre, NuevasProps, Relaciones, Objetos)], NuevaKB),
+        write('Propiedad agregada a la clase exitosamente.'), nl
+    ;
+        write('La clase especificada no existe.'), nl,
+        NuevaKB = KB
+    ).
 
-% Inciso c
-% Predicado para añadir una relación a una clase en la base de conocimientos
-add_class_relation(NombreClase, Relacion, ClasesRelacionadas, KB, NuevaKB) :-
-    select(class(NombreClase, ClaseMadre, Propiedades, Relaciones, Objetos), KB, KBRestante),
-    append(Relaciones, [Relacion=>ClasesRelacionadas], NuevasRelaciones),
-    append(KBRestante, [class(NombreClase, ClaseMadre, Propiedades, NuevasRelaciones, Objetos)], NuevaKB).
+% Añadir una propiedad a un objeto
+add_object_property(NombreObjeto, Propiedad, Valor, KB, NuevaKB) :-
+    (select(class(ClaseNombre, ClaseMadre, Props, Relaciones, Objetos), KB, TempKB) ->
+        maplist(
+            ({NombreObjeto, Propiedad, Valor}/[Objeto, ObjetoActualizado]>>
+                (Objeto = [id=>NombreObjeto, PropiedadesObjeto, RelacionesObjeto] ->
+                    append(PropiedadesObjeto, [[Propiedad => Valor]], NuevasProps),
+                    ObjetoActualizado = [id=>NombreObjeto, NuevasProps, RelacionesObjeto]
+                ;
+                    ObjetoActualizado = Objeto
+                )
+            ),
+            Objetos, NuevosObjetos),
+        append(TempKB, [class(ClaseNombre, ClaseMadre, Props, Relaciones, NuevosObjetos)], NuevaKB),
+        write('Propiedad agregada al objeto exitosamente.'), nl
+    ;
+        write('El objeto o su clase no existen.'), nl,
+        NuevaKB = KB
+    ).
 
-% Predicado para añadir una relación a un objeto dentro de una clase
-add_object_relation(NombreClase, NombreObjeto, Relacion, ObjetosRelacionados, KB, NuevaKB) :-
-    select(class(NombreClase, ClaseMadre, Propiedades, Relaciones, Objetos), KB, KBRestante),
-    maplist(
-        ( [id=>NombreObjeto, PropiedadesObjeto, RelacionesObjeto] >> 
-            (append(RelacionesObjeto, [Relacion=>ObjetosRelacionados], NuevasRelacionesObjeto),
-             [id=>NombreObjeto, PropiedadesObjeto, NuevasRelacionesObjeto]) ),
-        Objetos, NuevosObjetos),
-    append(KBRestante, [class(NombreClase, ClaseMadre, Propiedades, Relaciones, NuevosObjetos)], NuevaKB).
+%--------------------------------------------------
+% Añadir Relaciones
+%--------------------------------------------------
+
+% Añadir una relación a una clase
+add_class_relation(ClaseNombre, Relacion, ClasesRelacionadas, KB, NuevaKB) :-
+    (select(class(ClaseNombre, ClaseMadre, Props, Relaciones, Objetos), KB, TempKB) ->
+        append(Relaciones, [[Relacion => ClasesRelacionadas]], NuevasRelaciones),
+        append(TempKB, [class(ClaseNombre, ClaseMadre, Props, NuevasRelaciones, Objetos)], NuevaKB),
+        write('Relación agregada a la clase exitosamente.'), nl
+    ;
+        write('La clase especificada no existe.'), nl,
+        NuevaKB = KB
+    ).
+
+% Añadir una relación a un objeto
+add_object_relation(NombreObjeto, Relacion, ObjetosRelacionados, KB, NuevaKB) :-
+    (select(class(ClaseNombre, ClaseMadre, Props, Relaciones, Objetos), KB, TempKB) ->
+        maplist(
+            ({NombreObjeto, Relacion, ObjetosRelacionados}/[Objeto, ObjetoActualizado]>>
+                (Objeto = [id=>NombreObjeto, PropsObjeto, RelacionesObjeto] ->
+                    append(RelacionesObjeto, [[Relacion => ObjetosRelacionados]], NuevasRelacionesObjeto),
+                    ObjetoActualizado = [id=>NombreObjeto, PropsObjeto, NuevasRelacionesObjeto]
+                ;
+                    ObjetoActualizado = Objeto
+                )
+            ),
+            Objetos, NuevosObjetos),
+        append(TempKB, [class(ClaseNombre, ClaseMadre, Props, Relaciones, NuevosObjetos)], NuevaKB),
+        write('Relación agregada al objeto exitosamente.'), nl
+    ;
+        write('El objeto o su clase no existen.'), nl,
+        NuevaKB = KB
+    ).
 
 %-----------------------------------
 %		Punto 3
