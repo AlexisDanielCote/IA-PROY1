@@ -108,24 +108,73 @@ find_subclass_instances([SubClass|Rest], KnowledgeBase, AllInstances) :-
 %inciso b
 % Predicado para buscar todas las instancias que tienen una propiedad específica y devolver sus valores en el formato Id:Value
 property_extension(Property, KB, Result) :-
+    % Buscar las instancias que tienen la propiedad mediante herencia
     findall(
         Id:Value, % Lista en formato Id:Value
         (
-            member(class(_, _, Properties, _, Instances), KB),
-            member([id=>Id | Attributes], Instances),
-            (
-                % Si la propiedad está en las propiedades de la clase o en los atributos de la instancia
-                (member(Property, Properties), Value = yes)
-                ;
-                (member(Property=>Value, Attributes), Value = yes)
-                ;
-                Value = no % Si no se encuentra la propiedad, asignar 'no'
+            % Recorre las clases en KB
+            member(class(Class, ParentClass, _, _, Instances), KB),
+            % Busca la propiedad en la jerarquía de clases (padre si es necesario)
+            check_property_with_inheritance(Property, Class, ParentClass, KB, InitialValue),
+            % Para cada instancia, asigna el valor heredado o el valor del atributo
+            member([id=>Id, Attributes, _], Instances),
+            % Desempaquetar los atributos para buscar la propiedad
+            flatten(Attributes, FlatAttributes),
+            % Sobrescribir el valor si la propiedad está definida en los atributos de la instancia
+            (   member(Property=>AttributeValue, FlatAttributes) 
+                -> Value = AttributeValue, write(Value),nl
+            ;   Value = InitialValue
             )
         ),
         ResultUnfiltered
     ),
-    % Filtrar duplicados dejando solo el primer resultado encontrado
-    sort(ResultUnfiltered, Result).
+    % Procesar ResultUnfiltered para eliminar duplicados: conservar el que tenga 'yes' si hay 'no' para el mismo Id
+    remove_duplicates_with_preference(ResultUnfiltered, Result).
+
+% Predicado auxiliar para verificar la propiedad en la clase actual o en la clase padre si es necesario
+check_property_with_inheritance(Property, Class, ParentClass, KB, Value) :-
+    % Verifica si la propiedad está en la lista de propiedades de la clase actual
+    (   member(class(Class, _, Properties, _, _), KB),
+        (   member([Property, 0], Properties) % Propiedad afirmativa en la clase actual
+        ->  Value = yes
+        ;   member([not(Property), 0], Properties) % Propiedad negada en la clase actual
+        ->  Value = no
+        ;   % Si no está en la clase actual y hay una clase padre, verifica en la clase padre
+            ParentClass \= none,
+            check_property_with_inheritance(Property, ParentClass, _, KB, Value)
+        )
+    ;   % Si no se encuentra la propiedad en ninguna parte de la jerarquía, asigna 'no'
+        Value = no
+    ).
+
+% Predicado auxiliar para eliminar duplicados, manteniendo condiciones específicas
+remove_duplicates_with_preference(Unfiltered, Filtered) :-
+    % Agrupar por Id y seleccionar el valor preferido según las reglas
+    findall(
+        Id:FinalValue,
+        (
+            member(Id:_, Unfiltered), % Buscar cada Id único en Unfiltered
+            findall(Value, member(Id:Value, Unfiltered), Values), % Filtrar todos los valores asociados a ese Id
+            % Aplicar las reglas para seleccionar el valor final
+            process_values(Values, FinalValue)
+        ),
+        FilteredUnsorted
+    ),
+    % Remover duplicados en caso de múltiples Id:Value idénticos
+    sort(FilteredUnsorted, Filtered).
+
+% Procesar la lista de valores asociada a un Id para seleccionar el valor final
+process_values(Values, FinalValue) :-
+    exclude(==(no), Values, NonNoValues), % Excluir 'no' de la lista
+    exclude(==(yes), NonNoValues, FilteredValues), % Excluir 'yes' de la lista
+    (
+        FilteredValues \= [] % Si hay valores diferentes de 'yes' o 'no', seleccionarlos
+        -> list_to_set(FilteredValues, [FinalValue|_]) % Eliminar duplicados, quedarse con el primero
+        ; NonNoValues \= [] % Si no hay valores diferentes, pero hay 'yes', seleccionarlo
+        -> FinalValue = yes
+        ; FinalValue = no % Si todo es 'no', selecciona 'no'
+    ).
+
 
 %Inciso C)
 % Predicado para verificar si una clase hereda una relación de sus superclases
@@ -576,3 +625,40 @@ change_value_object_relation(NombreClase, NombreObjeto, Relacion, NuevosObjetosR
              ObjetoModificado = Objeto)),
         Objetos, NuevosObjetos),
     append(KBRestante, [class(NombreClase, ClaseMadre, Propiedades, Relaciones, NuevosObjetos)], NuevaKB).
+
+
+
+   % Predicado para imprimir la información de una clase específica
+imprimir_clase(class(NombreClase, ClasePadre, Propiedades, Restricciones, Objetos)) :-
+    format('Clase actual: ~w~n', [NombreClase]),
+    format('Clase padre: ~w~n', [ClasePadre]),
+    format('Propiedades: ~w~n', [Propiedades]),
+    format('Restricciones: ~w~n', [Restricciones]),
+    format('Objetos: ~w~n', [Objetos]),
+    nl.
+
+% Predicado para imprimir todas las clases desde la lista KB
+imprimir_clases(KB) :-
+    member(Class, KB),
+    imprimir_clase(Class),
+    fail.
+imprimir_clases(_).
+
+
+% Predicado para obtener las propiedades y restricciones heredadas
+obtener_propiedades_restricciones(NombreClase, Propiedades, Restricciones, KB) :-
+    obtener_propiedades_ancestros(NombreClase, KB, PropiedadesHeredadas, RestriccionesHeredadas),
+    member(class(NombreClase, _, PropiedadesClase, RestriccionesClase, _), KB),
+    append(PropiedadesHeredadas, PropiedadesClase, Propiedades),
+    append(RestriccionesHeredadas, RestriccionesClase, Restricciones).
+
+% Predicado auxiliar para obtener propiedades y restricciones de todos los ancestros
+obtener_propiedades_ancestros(NombreClase, KB, Propiedades, Restricciones) :-
+    member(class(NombreClase, ClasePadre, PropiedadesClase, RestriccionesClase, _), KB),
+    ClasePadre \= none,  % Verifica que la clase tenga un padre
+    obtener_propiedades_ancestros(ClasePadre, KB, PropiedadesPadre, RestriccionesPadre),
+    append(PropiedadesPadre, PropiedadesClase, Propiedades),
+    append(RestriccionesPadre, RestriccionesClase, Restricciones).
+
+obtener_propiedades_ancestros(NombreClase, KB, [], []) :-
+    member(class(NombreClase, none, _, _, _), KB).  % Caso base: sin padre (clase raíz)
