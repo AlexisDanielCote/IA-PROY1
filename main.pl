@@ -177,34 +177,93 @@ process_values(Values, FinalValue) :-
 
 
 %Inciso C)
-% Predicado para verificar si una clase hereda una relación de sus superclases
-inherits_relation(Relation, Class, KB) :-
-    member(class(Class, SuperClass, _, _, _), KB),
-    (relation_in_class(Relation, Class, KB); (SuperClass \= none, inherits_relation(Relation, SuperClass, KB))).
 
-% Predicado auxiliar para verificar si una relación está en una clase
-relation_in_class(Relation, Class, KB) :-
-    member(class(Class, _, _, _, Instances), KB),
-    member([id=>_, _, Relations], Instances),
-    member(Relation=>_, Relations).
-
-% Predicado para buscar la extensión de una relación en la base de conocimientos
 relation_extension(Relation, KB, Result) :-
+    % Buscar las instancias que tienen la propiedad mediante herencia
     findall(
-        Id:Related, % Formato Id:Related
+        Id:Value, % Lista en formato Id:Value
         (
-            member(class(Class, _, _, _, Instances), KB),
-            (
-                % Verificar si la clase hereda la relación
-                inherits_relation(Relation, Class, KB),
-                member([id=>Id, _, Relations], Instances),
-                member(Relation=>Related, Relations)
+            % Recorre las clases en KB
+            member(class(Class, ParentClass, _, _, Instances), KB),
+            % Busca la propiedad en la jerarquía de clases (padre si es necesario)
+            check_relation_with_inheritance_relation(Relation, Class, ParentClass, KB, InitialValue),
+            % Para cada instancia, asigna el valor heredado o el valor del atributo
+            member([id=>Id, _, Relations], Instances),
+            % Desempaquetar los atributos para buscar la propiedad
+            flatten(Relations, FlatRelations),
+            % Sobrescribir el valor si la propiedad está definida en los atributos de la instancia
+            (   member(Relation=>RelationValue, FlatRelations) 
+                -> Value = RelationValue, write(Value), nl
+            ;  
+                member(not(Relation=>RelationValue), FlatRelations) 
+                -> Value = RelationValue
+            ; 
+            Value = [InitialValue]
             )
         ),
         ResultUnfiltered
     ),
-    % Eliminar duplicados dejando solo la primera ocurrencia
-    sort(ResultUnfiltered, Result).
+    % Procesar ResultUnfiltered para eliminar duplicados: conservar el que tenga 'yes' si hay 'no' para el mismo Id
+   remove_duplicates_with_preference_relation(ResultUnfiltered, Result), !.
+
+
+% Predicado auxiliar para buscar los IDs relacionados con una clase específica
+look_ids(RelationValue, KB, IdLook) :-
+    findall(
+        Id,
+        (  
+            member(class(RelationValue, _, _, _, Instances), KB),
+            extract_id(Instances, Id) % Extraer el ID usando un predicado auxiliar
+        ),
+        IdLook
+    ).
+
+% Caso base: se encuentra un elemento con la estructura [id=>Id, _, _]
+extract_id([[id=>Id, _, _] | _], Id).
+
+% Caso recursivo: se sigue buscando en la lista
+extract_id([_ | Tail], Id) :- 
+    extract_id(Tail, Id).
+
+
+% Predicado auxiliar para verificar la propiedad en la clase actual o en la clase padre si es necesario
+check_relation_with_inheritance_relation(Relation, Class, ParentClass, KB, Value) :-
+    % Verifica si la propiedad está en la lista de propiedades de la clase actual
+    (   member(class(Class, _, _, Relationes, _), KB),
+        (  member([Relation=>RelationValue, 0], Relationes) % Propiedad afirmativa en la clase actual
+        ->  look_ids(RelationValue, KB, IdLook),
+            Value = IdLook, write(Value)
+        ;   member([not(Relation=>RelationValue), 0], Relationes) % Propiedad negada en la clase actual
+        ->  look_ids(RelationValue, KB, IdLook),
+            Value = IdLook, write(Value)
+        ;   % Si no está en la clase actual y hay una clase padre, verifica en la clase padre
+            ParentClass \= none,
+            check_relation_with_inheritance_relation(Relation, ParentClass, _, KB, Value)
+        )
+    ;   % Si no se encuentra la propiedad en ninguna parte de la jerarquía, asigna 'no'
+        Value = []
+    ).
+
+% Predicado auxiliar para eliminar duplicados, manteniendo condiciones específicas
+remove_duplicates_with_preference_relation(Unfiltered, Filtered) :-
+    findall(Id:FinalValue, 
+        (
+            member(Id:_UnfilteredValues, Unfiltered), % Buscar cada Id único en Unfiltered
+            findall(Value, member(Id:Value, Unfiltered), Values), % Filtrar todos los valores asociados a ese Id
+            process_values_relation(Values, FinalValue) % Aplicar las reglas para seleccionar el valor final
+        ),
+        FilteredUnsorted),
+    sort(FilteredUnsorted, Filtered). % Eliminar duplicados en caso de múltiples Id:Value idénticos
+   
+% Procesar la lista de valores asociada a un Id para seleccionar el valor final
+process_values_relation(Values, FinalValue) :-
+    exclude(==(no), Values, NonNoValues), % Excluir 'no' de la lista
+    exclude(==(yes), NonNoValues, FilteredValues), % Excluir 'yes' de la lista
+    (
+        FilteredValues = [] % Si no quedan valores diferentes de 'no' o 'yes'
+        -> FinalValue = [] % Retornar una lista vacía
+        ; list_to_set(FilteredValues, [FinalValue|_]) % Si hay valores diferentes, eliminar duplicados y seleccionar el primero
+    ).
 
 %inciso d)
 % Predicado principal para encontrar todas las clases a las que pertenece un objeto
