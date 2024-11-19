@@ -1,0 +1,1412 @@
+?- open_kb('animales.txt',KB),
+|    add_class(gatos,mamiferos,KB,KB1),
+|    add_class_property(gatos,leales,no,KB1,KB2),
+|    add_class_relation(gatos,comen,peces,KB2,KB3),
+|    save_kb('animales_1.txt',KB3).
+Clase agregada exitosamente.
+Propiedad agregada a la clase exitosamente.
+Relación agregada a la clase exitosamente.
+KB = [class(top, none, [], [], []), class(animales, top, [], [], []), class(aves, animales, [[vuelan, 0], [not(nadan), 0]], [], []), class(peces, animales, [[nadan, 0], [not(bailan), 0]], [], [[id=>nemo, [], []]]), class(mamiferos, animales, [[not(oviparos), 0]], [], []), class(aguilas, aves, [], [[... => ...|...]], [[... => ...|...]]), class(pinguino, aves, [[...|...]|...], [], [[...|...]]), class(ornitorrincos, mamiferos, [...], [], [])],
+KB1 = [class(top, none, [], [], []), class(animales, top, [], [], []), class(aves, animales, [[vuelan, 0], [not(nadan), 0]], [], []), class(peces, animales, [[nadan, 0], [not(bailan), 0]], [], [[id=>nemo, [], []]]), class(mamiferos, animales, [[not(oviparos), 0]], [], []), class(aguilas, aves, [], [[... => ...|...]], [[... => ...|...]]), class(pinguino, aves, [[...|...]|...], [], [[...|...]]), class(ornitorrincos, mamiferos, [...], [], []), class(..., ..., ..., ..., ...)],
+KB2 = [class(top, none, [], [], []), class(animales, top, [], [], []), class(aves, animales, [[vuelan, 0], [not(nadan), 0]], [], []), class(peces, animales, [[nadan, 0], [not(bailan), 0]], [], [[id=>nemo, [], []]]), class(mamiferos, animales, [[not(oviparos), 0]], [], []), class(aguilas, aves, [], [[... => ...|...]], [[... => ...|...]]), class(pinguino, aves, [[...|...]|...], [], [[...|...]]), class(ornitorrincos, mamiferos, [...], [], []), class(..., ..., ..., ..., ...)],
+KB3 = [class(top, none, [], [], []), class(animales, top, [], [], []), class(aves, animales, [[vuelan, 0], [not(nadan), 0]], [], []), class(peces, animales, [[nadan, 0], [not(bailan), 0]], [], [[id=>nemo, [], []]]), class(mamiferos, animales, [[not(oviparos), 0]], [], []), class(aguilas, aves, [], [[... => ...|...]], [[... => ...|...]]), class(pinguino, aves, [[...|...]|...], [], [[...|...]]), class(ornitorrincos, mamiferos, [...], [], []), class(..., ..., ..., ..., ...)].
+==> animales_1.png
+$cat animales_1.txt
+[
+class(top, none, [], [], []),
+
+class(animales, top, [], [], []),
+
+class(aves, animales,
+     [[vuelan,0],[not(nadan),0]],
+     [],
+     []
+     ),
+
+class(peces, animales,
+     [[nadan,0],[not(bailan),0]],
+     [],
+     [
+          [id=>nemo,[],[]]
+     ]
+     ),
+
+class(mamiferos, animales,
+     [[not(oviparos),0]],
+     [],
+     []
+     ),
+
+class(aguilas, aves,
+     [],
+     [[comen=>peces,0]],
+     [
+          [id=>pedro,[[tam=>grande,0]],[[not(amigo=>arturo),0]]]
+     ]
+     ),
+
+class(pinguino, aves,
+     [[not(vuelan),0],[nadan,0]],
+     [],
+     [
+          [id=>arturo,[[listo,0]],[[amigo=>pedro,0]]]
+     ]
+     ),
+
+class(ornitorrincos, mamiferos,
+     [[oviparos,0]],
+     [],
+     []
+     ),
+
+class(gatos, mamiferos,
+     [[leales=>no]],
+     [[comen=>peces]],
+     [])
+
+
+?- open_kb('animales_1.txt',KB),
+|    add_object(perry,ornitorrincos,KB,KB1),
+|    add_object_property(perry,'agente_secreto',yes,KB1,KB2),
+|    add_object_relation(perry,not(amigo),pedro,KB2,KB3),
+|    save_kb('animales_2.txt',KB3).
+Objeto agregado exitosamente.
+Propiedad agregada al objeto exitosamente.
+Relación agregada al objeto exitosamente.
+KB = [class(top, none, [], [], []), class(animales, top, [], [], []), class(aves, animales, [[vuelan, 0], [not(nadan), 0]], [], []), class(peces, animales, [[nadan, 0], [not(bailan), 0]], [], [[id=>nemo, [], []]]), class(mamiferos, animales, [[not(oviparos), 0]], [], []), class(aguilas, aves, [], [[... => ...|...]], [[... => ...|...]]), class(pinguino, aves, [[...|...]|...], [], [[...|...]]), class(ornitorrincos, mamiferos, [...], [], []), class(..., ..., ..., ..., ...)],
+KB1 = [class(top, none, [], [], []), class(animales, top, [], [], []), class(aves, animales, [[vuelan, 0], [not(nadan), 0]], [], []), class(peces, animales, [[nadan, 0], [not(bailan), 0]], [], [[id=>nemo, [], []]]), class(mamiferos, animales, [[not(oviparos), 0]], [], []), class(aguilas, aves, [], [[... => ...|...]], [[... => ...|...]]), class(pinguino, aves, [[...|...]|...], [], [[...|...]]), class(gatos, mamiferos, [...], [...], []), class(..., ..., ..., ..., ...)],
+KB2 = [class(top, none, [], [], []), class(animales, top, [], [], []), class(aves, animales, [[vuelan, 0], [not(nadan), 0]], [], []), class(peces, animales, [[nadan, 0], [not(bailan), 0]], [], [[id=>nemo, [], []]]), class(mamiferos, animales, [[not(oviparos), 0]], [], []), class(aguilas, aves, [], [[... => ...|...]], [[... => ...|...]]), class(pinguino, aves, [[...|...]|...], [], [[...|...]]), class(gatos, mamiferos, [...], [...], []), class(..., ..., ..., ..., ...)],
+KB3 = [class(top, none, [], [], []), class(animales, top, [], [], []), class(aves, animales, [[vuelan, 0], [not(nadan), 0]], [], []), class(peces, animales, [[nadan, 0], [not(bailan), 0]], [], [[id=>nemo, [], []]]), class(mamiferos, animales, [[not(oviparos), 0]], [], []), class(aguilas, aves, [], [[... => ...|...]], [[... => ...|...]]), class(pinguino, aves, [[...|...]|...], [], [[...|...]]), class(gatos, mamiferos, [...], [...], []), class(..., ..., ..., ..., ...)] .
+
+==> animales_2.png
+$cat animales_2.txt
+[
+class(top, none, [], [], []),
+
+class(animales, top, [], [], []),
+
+class(aves, animales,
+     [[vuelan,0],[not(nadan),0]],
+     [],
+     []
+     ),
+
+class(peces, animales,
+     [[nadan,0],[not(bailan),0]],
+     [],
+     [
+          [id=>nemo,[],[]]
+     ]
+     ),
+
+class(mamiferos, animales,
+     [[not(oviparos),0]],
+     [],
+     []
+     ),
+
+class(aguilas, aves,
+     [],
+     [[comen=>peces,0]],
+     [
+          [id=>pedro,[[tam=>grande,0]],[[not(amigo=>arturo),0]]]
+     ]
+     ),
+
+class(pinguino, aves,
+     [[not(vuelan),0],[nadan,0]],
+     [],
+     [
+          [id=>arturo,[[listo,0]],[[amigo=>pedro,0]]]
+     ]
+     ),
+
+class(gatos, mamiferos,
+     [[leales=>no]],
+     [[comen=>peces]],
+     []
+     ),
+
+class(ornitorrincos, mamiferos,
+     [[oviparos,0]],
+     [],
+     [
+          [id=>perry,[[agente_secreto=>yes]],[[not(amigo)=>pedro]]]
+     ]
+     )
+
+
+?- open_kb('animales_2.txt',KB),
+|    rm_class(gatos,KB,KB1),
+|    rm_object(arturo,KB1,KB2),
+|    save_kb('animales_3.txt',KB2).
+KB = [class(top, none, [], [], []), class(animales, top, [], [], []), class(aves, animales, [[vuelan, 0], [not(nadan), 0]], [], []), class(peces, animales, [[nadan, 0], [not(bailan), 0]], [], [[id=>nemo, [], []]]), class(mamiferos, animales, [[not(oviparos), 0]], [], []), class(aguilas, aves, [], [[... => ...|...]], [[... => ...|...]]), class(pinguino, aves, [[...|...]|...], [], [[...|...]]), class(gatos, mamiferos, [...], [...], []), class(..., ..., ..., ..., ...)],
+KB1 = [class(top, none, [], [], []), class(animales, top, [], [], []), class(aves, animales, [[vuelan, 0], [not(nadan), 0]], [], []), class(peces, animales, [[nadan, 0], [not(bailan), 0]], [], [[id=>nemo, [], []]]), class(mamiferos, animales, [[not(oviparos), 0]], [], []), class(aguilas, aves, [], [[... => ...|...]], [[... => ...|...]]), class(pinguino, aves, [[...|...]|...], [], [[...|...]]), class(ornitorrincos, mamiferos, [...], [], [...])],
+KB2 = [class(top, none, [], [], []), class(animales, top, [], [], []), class(aves, animales, [[vuelan, 0], [not(nadan), 0]], [], []), class(peces, animales, [[nadan, 0], [not(bailan), 0]], [], [[id=>nemo, [], []]]), class(mamiferos, animales, [[not(oviparos), 0]], [], []), class(aguilas, aves, [], [[... => ...|...]], [[... => ...|...]]), class(pinguino, aves, [[...|...]|...], [], []), class(ornitorrincos, mamiferos, [...], [], [...])] .
+
+==> animales_3.png
+$cat animales_3.txt
+[
+class(top, none, [], [], []),
+
+class(animales, top, [], [], []),
+
+class(aves, animales,
+     [[vuelan,0],[not(nadan),0]],
+     [],
+     []
+     ),
+
+class(peces, animales,
+     [[nadan,0],[not(bailan),0]],
+     [],
+     [
+          [id=>nemo,[],[]]
+     ]
+     ),
+
+class(mamiferos, animales,
+     [[not(oviparos),0]],
+     [],
+     []
+     ),
+
+class(aguilas, aves,
+     [],
+     [[comen=>peces,0]],
+     [
+          [id=>pedro,[[tam=>grande,0]],[[not(amigo=>arturo),0]]]
+     ]
+     ),
+
+class(pinguino, aves,
+     [[not(vuelan),0],[nadan,0]],
+     [],
+     []
+     ),
+
+class(ornitorrincos, mamiferos,
+     [[oviparos,0]],
+     [],
+     [
+          [id=>perry,[[agente_secreto=>yes]],[[not(amigo)=>pedro]]]
+     ]
+     )
+
+
+?- open_kb('animales_3.txt',KB),
+|    change_value_class_property(peces,bailan,yes,KB,KB1),
+|    change_object_name(nemo,doris,KB1,KB2),
+|    change_value_object_relation(perry,not(amigo),doris,KB2,KB3),
+|    save_kb('animales_4.txt',KB3).
+KB = [class(top, none, [], [], []), class(animales, top, [], [], []), class(aves, animales, [[vuelan, 0], [not(nadan), 0]], [], []), class(peces, animales, [[nadan, 0], [not(bailan), 0]], [], [[id=>nemo, [], []]]), class(mamiferos, animales, [[not(oviparos), 0]], [], []), class(aguilas, aves, [], [[... => ...|...]], [[... => ...|...]]), class(pinguino, aves, [[...|...]|...], [], []), class(ornitorrincos, mamiferos, [...], [], [...])],
+KB1 = [class(top, none, [], [], []), class(animales, top, [], [], []), class(aves, animales, [[vuelan, 0], [not(nadan), 0]], [], []), class(peces, animales, [[nadan, 0], [bailan=>yes]], [], [[id=>nemo, [], []]]), class(mamiferos, animales, [[not(oviparos), 0]], [], []), class(aguilas, aves, [], [[... => ...|...]], [[... => ...|...]]), class(pinguino, aves, [[...|...]|...], [], []), class(ornitorrincos, mamiferos, [...], [], [...])],
+KB2 = [class(top, none, [], [], []), class(animales, top, [], [], []), class(aves, animales, [[vuelan, 0], [not(nadan), 0]], [], []), class(peces, animales, [[nadan, 0], [bailan=>yes]], [], [[id=>doris, [], []]]), class(mamiferos, animales, [[not(oviparos), 0]], [], []), class(aguilas, aves, [], [[... => ...|...]], [[... => ...|...]]), class(pinguino, aves, [[...|...]|...], [], []), class(ornitorrincos, mamiferos, [...], [], [...])],
+KB3 = [class(top, none, [], [], []), class(animales, top, [], [], []), class(aves, animales, [[vuelan, 0], [not(nadan), 0]], [], []), class(peces, animales, [[nadan, 0], [bailan=>yes]], [], [[id=>doris, [], []]]), class(mamiferos, animales, [[not(oviparos), 0]], [], []), class(aguilas, aves, [], [[... => ...|...]], [[... => ...|...]]), class(pinguino, aves, [[...|...]|...], [], []), class(ornitorrincos, mamiferos, [...], [], [...])] .
+
+==> animales_4.png
+$cat animales_4.txt
+[
+class(top, none, [], [], []),
+
+class(animales, top, [], [], []),
+
+class(aves, animales,
+     [[vuelan,0],[not(nadan),0]],
+     [],
+     []
+     ),
+
+class(peces, animales,
+     [[nadan,0],[bailan=>yes]],
+     [],
+     [
+          [id=>doris,[],[]]
+     ]
+     ),
+
+class(mamiferos, animales,
+     [[not(oviparos),0]],
+     [],
+     []
+     ),
+
+class(aguilas, aves,
+     [],
+     [[comen=>peces,0]],
+     [
+          [id=>pedro,[[tam=>grande,0]],[[not(amigo=>arturo),0]]]
+     ]
+     ),
+
+class(pinguino, aves,
+     [[not(vuelan),0],[nadan,0]],
+     [],
+     []
+     ),
+
+class(ornitorrincos, mamiferos,
+     [[oviparos,0]],
+     [],
+     [
+          [id=>perry,[[agente_secreto=>yes]],[[not(amigo)=>doris]]]
+     ]
+     )
+
+
+?- open_kb('animales.txt',KB),class_property_value(peces,vuelan,KB,X).
+KB = [class(top, none, [], [], []), class(animales, top, [], [], []), class(aves, animales, [[vuelan, 0], [not(nadan), 0]], [], []), class(peces, animales, [[nadan, 0], [not(bailan), 0]], [], [[id=>nemo, [], []]]), class(mamiferos, animales, [[not(oviparos), 0]], [], []), class(aguilas, aves, [], [[... => ...|...]], [[... => ...|...]]), class(pinguino, aves, [[...|...]|...], [], [[...|...]]), class(ornitorrincos, mamiferos, [...], [], [])],
+X = unknown.
+
+
+?- open_kb('animales.txt',KB),object_property_value(pedro,bailan,KB,X).
+KB = [class(top, none, [], [], []), class(animales, top, [], [], []), class(aves, animales, [[vuelan, 0], [not(nadan), 0]], [], []), class(peces, animales, [[nadan, 0], [not(bailan), 0]], [], [[id=>nemo, [], []]]), class(mamiferos, animales, [[not(oviparos), 0]], [], []), class(aguilas, aves, [], [[... => ...|...]], [[... => ...|...]]), class(pinguino, aves, [[...|...]|...], [], [[...|...]]), class(ornitorrincos, mamiferos, [...], [], [])],
+X = unknown .
+
+
+Ejemplos de ejecucion del lado del Equipo Cote-Ramos
+
+1. Añadir
+(a) Añadir clases y objetos
+    1. Añadir clase:
+?- open_kb('animales.txt', KB),
+|       add_class(reptiles, animales, KB, KB1),
+|       save_kb('animales_1.txt', KB1).
+Clase agregada exitosamente.
+KB = [class(top, none, [], [], []), class(animales, top, [], [], []), class(aves, animales, [[vuelan, 0], [not(nadan), 0]], [], []), class(peces, animales, [[nadan, 0], [not(bailan), 0]], [], [[id=>nemo, [], []]]), class(mamiferos, animales, [[not(oviparos), 0]], [], []), class(aguilas, aves, [], [[... => ...|...]], [[... => ...|...]]), class(pinguino, aves, [[...|...]|...], [], [[...|...]]), class(ornitorrincos, mamiferos, [...], [], [])],
+KB1 = [class(top, none, [], [], []), class(animales, top, [], [], []), class(aves, animales, [[vuelan, 0], [not(nadan), 0]], [], []), class(peces, animales, [[nadan, 0], [not(bailan), 0]], [], [[id=>nemo, [], []]]), class(mamiferos, animales, [[not(oviparos), 0]], [], []), class(aguilas, aves, [], [[... => ...|...]], [[... => ...|...]]), class(pinguino, aves, [[...|...]|...], [], [[...|...]]), class(ornitorrincos, mamiferos, [...], [], []), class(..., ..., ..., ..., ...)].
+
+Resultado: Se agrega la clase reptiles como hija de animales.
+class(reptiles, animales, [], [], [])
+$cat animales_1.txt
+[
+class(top, none, [], [], []),
+
+class(animales, top, [], [], []),
+
+class(aves, animales,
+     [[vuelan,0],[not(nadan),0]],
+     [],
+     []
+     ),
+
+class(peces, animales,
+     [[nadan,0],[not(bailan),0]],
+     [],
+     [
+          [id=>nemo,[],[]]
+     ]
+     ),
+
+class(mamiferos, animales,
+     [[not(oviparos),0]],
+     [],
+     []
+     ),
+
+class(aguilas, aves,
+     [],
+     [[comen=>peces,0]],
+     [
+          [id=>pedro,[[tam=>grande,0]],[[not(amigo=>arturo),0]]]
+     ]
+     ),
+
+class(pinguino, aves,
+     [[not(vuelan),0],[nadan,0]],
+     [],
+     [
+          [id=>arturo,[[listo,0]],[[amigo=>pedro,0]]]
+     ]
+     ),
+
+class(ornitorrincos, mamiferos,
+     [[oviparos,0]],
+     [],
+     []
+     ),
+
+class(reptiles, animales, [], [], [])
+
+
+
+    2. Añadir objeto:
+?- open_kb('animales_1.txt', KB),
+|       add_object(perry, mamiferos, KB, KB1),
+|       save_kb('animales_2.txt', KB1).
+Objeto agregado exitosamente.
+KB = [class(top, none, [], [], []), class(animales, top, [], [], []), class(aves, animales, [[vuelan, 0], [not(nadan), 0]], [], []), class(peces, animales, [[nadan, 0], [not(bailan), 0]], [], [[id=>nemo, [], []]]), class(mamiferos, animales, [[not(oviparos), 0]], [], []), class(aguilas, aves, [], [[... => ...|...]], [[... => ...|...]]), class(pinguino, aves, [[...|...]|...], [], [[...|...]]), class(ornitorrincos, mamiferos, [...], [], []), class(..., ..., ..., ..., ...)],
+KB1 = [class(top, none, [], [], []), class(animales, top, [], [], []), class(aves, animales, [[vuelan, 0], [not(nadan), 0]], [], []), class(peces, animales, [[nadan, 0], [not(bailan), 0]], [], [[id=>nemo, [], []]]), class(aguilas, aves, [], [[comen=>peces, 0]], [[id=>pedro, [...]|...]]), class(pinguino, aves, [[not(...)|...], [...|...]], [], [[... => ...|...]]), class(ornitorrincos, mamiferos, [[...|...]], [], []), class(reptiles, animales, [], [], []), class(..., ..., ..., ..., ...)] .
+
+Resultado: Se agrega el objeto perry a la clase mamiferos.
+class(mamiferos, animales, [], [], [[id=>perry,[],[]]])
+
+$cat animales_2.txt
+[
+class(top, none, [], [], []),
+
+class(animales, top, [], [], []),
+
+class(aves, animales,
+     [[vuelan,0],[not(nadan),0]],
+     [],
+     []
+     ),
+
+class(peces, animales,
+     [[nadan,0],[not(bailan),0]],
+     [],
+     [
+          [id=>nemo,[],[]]
+     ]
+     ),
+
+class(aguilas, aves,
+     [],
+     [[comen=>peces,0]],
+     [
+          [id=>pedro,[[tam=>grande,0]],[[not(amigo=>arturo),0]]]
+     ]
+     ),
+
+class(pinguino, aves,
+     [[not(vuelan),0],[nadan,0]],
+     [],
+     [
+          [id=>arturo,[[listo,0]],[[amigo=>pedro,0]]]
+     ]
+     ),
+
+class(ornitorrincos, mamiferos,
+     [[oviparos,0]],
+     [],
+     []
+     ),
+
+class(reptiles, animales, [], [], []),
+
+class(mamiferos, animales,
+     [[not(oviparos),0]],
+     [],
+     [
+          [id=>perry,[],[]]
+     ]
+     )
+
+
+(b) Añadir propiedades
+1. Añadir propiedad a clase:
+?- open_kb('animales_2.txt', KB),
+|       add_class_property(reptiles, escamas, si, KB, KB1),
+|       save_kb('animales_3.txt', KB1).
+Propiedad agregada a la clase exitosamente.
+KB = [class(top, none, [], [], []), class(animales, top, [], [], []), class(aves, animales, [[vuelan, 0], [not(nadan), 0]], [], []), class(peces, animales, [[nadan, 0], [not(bailan), 0]], [], [[id=>nemo, [], []]]), class(aguilas, aves, [], [[comen=>peces, 0]], [[id=>pedro, [...]|...]]), class(pinguino, aves, [[not(...)|...], [...|...]], [], [[... => ...|...]]), class(ornitorrincos, mamiferos, [[...|...]], [], []), class(reptiles, animales, [], [], []), class(..., ..., ..., ..., ...)],
+KB1 = [class(top, none, [], [], []), class(animales, top, [], [], []), class(aves, animales, [[vuelan, 0], [not(nadan), 0]], [], []), class(peces, animales, [[nadan, 0], [not(bailan), 0]], [], [[id=>nemo, [], []]]), class(aguilas, aves, [], [[comen=>peces, 0]], [[id=>pedro, [...]|...]]), class(pinguino, aves, [[not(...)|...], [...|...]], [], [[... => ...|...]]), class(ornitorrincos, mamiferos, [[...|...]], [], []), class(mamiferos, animales, [...], [], [...]), class(..., ..., ..., ..., ...)].
+
+Resultado: Se agrega la propiedad escamas a la clase reptiles.
+class(reptiles, animales, [[escamas=>si]], [], [])
+
+$cat animales_3.txt
+[
+class(top, none, [], [], []),
+
+class(animales, top, [], [], []),
+
+class(aves, animales,
+     [[vuelan,0],[not(nadan),0]],
+     [],
+     []
+     ),
+
+class(peces, animales,
+     [[nadan,0],[not(bailan),0]],
+     [],
+     [
+          [id=>nemo,[],[]]
+     ]
+     ),
+
+class(aguilas, aves,
+     [],
+     [[comen=>peces,0]],
+     [
+          [id=>pedro,[[tam=>grande,0]],[[not(amigo=>arturo),0]]]
+     ]
+     ),
+
+class(pinguino, aves,
+     [[not(vuelan),0],[nadan,0]],
+     [],
+     [
+          [id=>arturo,[[listo,0]],[[amigo=>pedro,0]]]
+     ]
+     ),
+
+class(ornitorrincos, mamiferos,
+     [[oviparos,0]],
+     [],
+     []
+     ),
+
+class(mamiferos, animales,
+     [[not(oviparos),0]],
+     [],
+     [
+          [id=>perry,[],[]]
+     ]
+     ),
+
+class(reptiles, animales,
+     [[escamas=>si]],
+     [],
+     [])
+
+
+2. Añadir propiedad a objeto:
+?- open_kb('animales_3.txt', KB),
+|       add_object_property(perry, agente_secreto, yes, KB, KB1),
+|       save_kb('animales_4.txt', KB1).
+Propiedad agregada al objeto exitosamente.
+KB = [class(top, none, [], [], []), class(animales, top, [], [], []), class(aves, animales, [[vuelan, 0], [not(nadan), 0]], [], []), class(peces, animales, [[nadan, 0], [not(bailan), 0]], [], [[id=>nemo, [], []]]), class(aguilas, aves, [], [[comen=>peces, 0]], [[id=>pedro, [...]|...]]), class(pinguino, aves, [[not(...)|...], [...|...]], [], [[... => ...|...]]), class(ornitorrincos, mamiferos, [[...|...]], [], []), class(mamiferos, animales, [...], [], [...]), class(..., ..., ..., ..., ...)],
+KB1 = [class(top, none, [], [], []), class(animales, top, [], [], []), class(aves, animales, [[vuelan, 0], [not(nadan), 0]], [], []), class(peces, animales, [[nadan, 0], [not(bailan), 0]], [], [[id=>nemo, [], []]]), class(aguilas, aves, [], [[comen=>peces, 0]], [[id=>pedro, [...]|...]]), class(pinguino, aves, [[not(...)|...], [...|...]], [], [[... => ...|...]]), class(ornitorrincos, mamiferos, [[...|...]], [], []), class(mamiferos, animales, [...], [], [...]), class(..., ..., ..., ..., ...)].
+
+Resultado: Se agrega la propiedad agente_secreto al objeto perry.
+[id=>perry,[[agente_secreto=>yes]],[]]
+$cat animales_4.txt
+[
+class(top, none, [], [], []),
+
+class(animales, top, [], [], []),
+
+class(aves, animales,
+     [[vuelan,0],[not(nadan),0]],
+     [],
+     []
+     ),
+
+class(peces, animales,
+     [[nadan,0],[not(bailan),0]],
+     [],
+     [
+          [id=>nemo,[],[]]
+     ]
+     ),
+
+class(aguilas, aves,
+     [],
+     [[comen=>peces,0]],
+     [
+          [id=>pedro,[[tam=>grande,0]],[[not(amigo=>arturo),0]]]
+     ]
+     ),
+
+class(pinguino, aves,
+     [[not(vuelan),0],[nadan,0]],
+     [],
+     [
+          [id=>arturo,[[listo,0]],[[amigo=>pedro,0]]]
+     ]
+     ),
+
+class(ornitorrincos, mamiferos,
+     [[oviparos,0]],
+     [],
+     []
+     ),
+
+class(mamiferos, animales,
+     [[not(oviparos),0]],
+     [],
+     [
+          [id=>perry,[[agente_secreto=>yes]],[]]
+     ]
+     ),
+
+class(reptiles, animales,
+     [[escamas=>si]],
+     [],
+     [])
+
+
+
+(c) Añadir relaciones
+1. Añadir relación a clase:
+?- open_kb('animales_4.txt', KB),
+|       add_class_relation(peces, viven_en, agua, KB, KB1),
+|       save_kb('animales_5.txt', KB1).
+Relación agregada a la clase exitosamente.
+KB = [class(top, none, [], [], []), class(animales, top, [], [], []), class(aves, animales, [[vuelan, 0], [not(nadan), 0]], [], []), class(peces, animales, [[nadan, 0], [not(bailan), 0]], [], [[id=>nemo, [], []]]), class(aguilas, aves, [], [[comen=>peces, 0]], [[id=>pedro, [...]|...]]), class(pinguino, aves, [[not(...)|...], [...|...]], [], [[... => ...|...]]), class(ornitorrincos, mamiferos, [[...|...]], [], []), class(mamiferos, animales, [...], [], [...]), class(..., ..., ..., ..., ...)],
+KB1 = [class(top, none, [], [], []), class(animales, top, [], [], []), class(aves, animales, [[vuelan, 0], [not(nadan), 0]], [], []), class(aguilas, aves, [], [[comen=>peces, 0]], [[id=>pedro, [[...|...]], [...]]]), class(pinguino, aves, [[not(vuelan), 0], [nadan|...]], [], [[id=>arturo, [...]|...]]), class(ornitorrincos, mamiferos, [[oviparos|...]], [], []), class(mamiferos, animales, [[...|...]], [], [[...|...]]), class(reptiles, animales, [...], [], []), class(..., ..., ..., ..., ...)].
+
+Resultado: Se agrega la relación viven_en a la clase peces.
+class(peces, animales, [[nadan,0]], [[viven_en=>agua]], [[id=>nemo,[],[]]])
+$cat animales_5.txt
+[
+class(top, none, [], [], []),
+
+class(animales, top, [], [], []),
+
+class(aves, animales,
+     [[vuelan,0],[not(nadan),0]],
+     [],
+     []
+     ),
+
+class(aguilas, aves,
+     [],
+     [[comen=>peces,0]],
+     [
+          [id=>pedro,[[tam=>grande,0]],[[not(amigo=>arturo),0]]]
+     ]
+     ),
+
+class(pinguino, aves,
+     [[not(vuelan),0],[nadan,0]],
+     [],
+     [
+          [id=>arturo,[[listo,0]],[[amigo=>pedro,0]]]
+     ]
+     ),
+
+class(ornitorrincos, mamiferos,
+     [[oviparos,0]],
+     [],
+     []
+     ),
+
+class(mamiferos, animales,
+     [[not(oviparos),0]],
+     [],
+     [
+          [id=>perry,[[agente_secreto=>yes]],[]]
+     ]
+     ),
+
+class(reptiles, animales,
+     [[escamas=>si]],
+     [],
+     []
+     ),
+
+class(peces, animales,
+     [[nadan,0],[not(bailan),0]],
+     [[viven_en=>agua]],
+     [
+          [id=>nemo,[],[]]
+     ]
+     )
+
+
+2. Añadir relación a objeto:
+?- open_kb('animales_5.txt', KB),
+|       add_object_relation(nemo, amigo, perry, KB, KB1),
+|       save_kb('animales_6.txt', KB1).
+Relación agregada al objeto exitosamente.
+KB = [class(top, none, [], [], []), class(animales, top, [], [], []), class(aves, animales, [[vuelan, 0], [not(nadan), 0]], [], []), class(aguilas, aves, [], [[comen=>peces, 0]], [[id=>pedro, [[...|...]], [...]]]), class(pinguino, aves, [[not(vuelan), 0], [nadan|...]], [], [[id=>arturo, [...]|...]]), class(ornitorrincos, mamiferos, [[oviparos|...]], [], []), class(mamiferos, animales, [[...|...]], [], [[...|...]]), class(reptiles, animales, [...], [], []), class(..., ..., ..., ..., ...)],
+KB1 = [class(top, none, [], [], []), class(animales, top, [], [], []), class(aves, animales, [[vuelan, 0], [not(nadan), 0]], [], []), class(aguilas, aves, [], [[comen=>peces, 0]], [[id=>pedro, [[...|...]], [...]]]), class(pinguino, aves, [[not(vuelan), 0], [nadan|...]], [], [[id=>arturo, [...]|...]]), class(ornitorrincos, mamiferos, [[oviparos|...]], [], []), class(mamiferos, animales, [[...|...]], [], [[...|...]]), class(reptiles, animales, [...], [], []), class(..., ..., ..., ..., ...)].
+
+Resultado: Se agrega la relación amigo al objeto nemo.
+[id=>nemo,[],[[amigo=>perry]]]
+$cat animales_6.txt
+[
+class(top, none, [], [], []),
+
+class(animales, top, [], [], []),
+
+class(aves, animales,
+     [[vuelan,0],[not(nadan),0]],
+     [],
+     []
+     ),
+
+class(aguilas, aves,
+     [],
+     [[comen=>peces,0]],
+     [
+          [id=>pedro,[[tam=>grande,0]],[[not(amigo=>arturo),0]]]
+     ]
+     ),
+
+class(pinguino, aves,
+     [[not(vuelan),0],[nadan,0]],
+     [],
+     [
+          [id=>arturo,[[listo,0]],[[amigo=>pedro,0]]]
+     ]
+     ),
+
+class(ornitorrincos, mamiferos,
+     [[oviparos,0]],
+     [],
+     []
+     ),
+
+class(mamiferos, animales,
+     [[not(oviparos),0]],
+     [],
+     [
+          [id=>perry,[[agente_secreto=>yes]],[]]
+     ]
+     ),
+
+class(reptiles, animales,
+     [[escamas=>si]],
+     [],
+     []
+     ),
+
+class(peces, animales,
+     [[nadan,0],[not(bailan),0]],
+     [[viven_en=>agua]],
+     [
+          [id=>nemo,[],[[amigo=>perry]]]
+     ]
+     )
+
+
+2. Eliminar
+(a) Eliminar clases y objetos
+1. Eliminar clase:
+?- open_kb('animales_6.txt', KB),
+|       rm_class(reptiles, KB, KB1),
+|       save_kb('animales_7.txt', KB1).
+KB = [class(top, none, [], [], []), class(animales, top, [], [], []), class(aves, animales, [[vuelan, 0], [not(nadan), 0]], [], []), class(aguilas, aves, [], [[comen=>peces, 0]], [[id=>pedro, [[...|...]], [...]]]), class(pinguino, aves, [[not(vuelan), 0], [nadan|...]], [], [[id=>arturo, [...]|...]]), class(ornitorrincos, mamiferos, [[oviparos|...]], [], []), class(mamiferos, animales, [[...|...]], [], [[...|...]]), class(reptiles, animales, [...], [], []), class(..., ..., ..., ..., ...)],
+KB1 = [class(top, none, [], [], []), class(animales, top, [], [], []), class(aves, animales, [[vuelan, 0], [not(nadan), 0]], [], []), class(aguilas, aves, [], [[comen=>peces, 0]], [[id=>pedro, [[...|...]], [...]]]), class(pinguino, aves, [[not(vuelan), 0], [nadan|...]], [], [[id=>arturo, [...]|...]]), class(ornitorrincos, mamiferos, [[oviparos|...]], [], []), class(mamiferos, animales, [[...|...]], [], [[...|...]]), class(peces, animales, [...|...], [...], [...])].
+
+Resultado: Se elimina la clase reptiles.
+$cat animales_7.txt
+[
+class(top, none, [], [], []),
+
+class(animales, top, [], [], []),
+
+class(aves, animales,
+     [[vuelan,0],[not(nadan),0]],
+     [],
+     []
+     ),
+
+class(aguilas, aves,
+     [],
+     [[comen=>peces,0]],
+     [
+          [id=>pedro,[[tam=>grande,0]],[[not(amigo=>arturo),0]]]
+     ]
+     ),
+
+class(pinguino, aves,
+     [[not(vuelan),0],[nadan,0]],
+     [],
+     [
+          [id=>arturo,[[listo,0]],[[amigo=>pedro,0]]]
+     ]
+     ),
+
+class(ornitorrincos, mamiferos,
+     [[oviparos,0]],
+     [],
+     []
+     ),
+
+class(mamiferos, animales,
+     [[not(oviparos),0]],
+     [],
+     [
+          [id=>perry,[[agente_secreto=>yes]],[]]
+     ]
+     ),
+
+class(peces, animales,
+     [[nadan,0],[not(bailan),0]],
+     [[viven_en=>agua]],
+     [
+          [id=>nemo,[],[[amigo=>perry]]]
+     ]
+     )
+
+
+2. Eliminar objeto:
+?- open_kb('animales_7.txt', KB),
+|       rm_object(perry, KB, KB1),
+|       save_kb('animales_8.txt', KB1).
+KB = [class(top, none, [], [], []), class(animales, top, [], [], []), class(aves, animales, [[vuelan, 0], [not(nadan), 0]], [], []), class(aguilas, aves, [], [[comen=>peces, 0]], [[id=>pedro, [[...|...]], [...]]]), class(pinguino, aves, [[not(vuelan), 0], [nadan|...]], [], [[id=>arturo, [...]|...]]), class(ornitorrincos, mamiferos, [[oviparos|...]], [], []), class(mamiferos, animales, [[...|...]], [], [[...|...]]), class(peces, animales, [...|...], [...], [...])],
+KB1 = [class(top, none, [], [], []), class(animales, top, [], [], []), class(aves, animales, [[vuelan, 0], [not(nadan), 0]], [], []), class(aguilas, aves, [], [[comen=>peces, 0]], [[id=>pedro, [[...|...]], [...]]]), class(pinguino, aves, [[not(vuelan), 0], [nadan|...]], [], [[id=>arturo, [...]|...]]), class(ornitorrincos, mamiferos, [[oviparos|...]], [], []), class(mamiferos, animales, [[...|...]], [], []), class(peces, animales, [...|...], [...], [...])] .
+
+Resultado: Se elimina el objeto perry de mamiferos.
+$cat animales_8.txt
+[
+class(top, none, [], [], []),
+
+class(animales, top, [], [], []),
+
+class(aves, animales,
+     [[vuelan,0],[not(nadan),0]],
+     [],
+     []
+     ),
+
+class(aguilas, aves,
+     [],
+     [[comen=>peces,0]],
+     [
+          [id=>pedro,[[tam=>grande,0]],[[not(amigo=>arturo),0]]]
+     ]
+     ),
+
+class(pinguino, aves,
+     [[not(vuelan),0],[nadan,0]],
+     [],
+     [
+          [id=>arturo,[[listo,0]],[[amigo=>pedro,0]]]
+     ]
+     ),
+
+class(ornitorrincos, mamiferos,
+     [[oviparos,0]],
+     [],
+     []
+     ),
+
+class(mamiferos, animales,
+     [[not(oviparos),0]],
+     [],
+     []
+     ),
+
+class(peces, animales,
+     [[nadan,0],[not(bailan),0]],
+     [[viven_en=>agua]],
+     [
+          [id=>nemo,[],[[amigo=>perry]]]
+     ]
+     )
+
+
+(b) Eliminar propiedades
+1. Eliminar propiedad de clase:
+?- open_kb('animales_8.txt', KB),
+|       rm_class_property(peces, nadan, KB, KB1),
+|       save_kb('animales_9.txt', KB1).
+KB = [class(top, none, [], [], []), class(animales, top, [], [], []), class(aves, animales, [[vuelan, 0], [not(nadan), 0]], [], []), class(aguilas, aves, [], [[comen=>peces, 0]], [[id=>pedro, [[...|...]], [...]]]), class(pinguino, aves, [[not(vuelan), 0], [nadan|...]], [], [[id=>arturo, [...]|...]]), class(ornitorrincos, mamiferos, [[oviparos|...]], [], []), class(mamiferos, animales, [[...|...]], [], []), class(peces, animales, [...|...], [...], [...])],
+KB1 = [class(top, none, [], [], []), class(animales, top, [], [], []), class(aves, animales, [[vuelan, 0], [not(nadan), 0]], [], []), class(aguilas, aves, [], [[comen=>peces, 0]], [[id=>pedro, [[...|...]], [...]]]), class(pinguino, aves, [[not(vuelan), 0], [nadan|...]], [], [[id=>arturo, [...]|...]]), class(ornitorrincos, mamiferos, [[oviparos|...]], [], []), class(mamiferos, animales, [[...|...]], [], []), class(peces, animales, [...], [...], [...])] .
+
+Resultado: Se elimina la propiedad nadan de peces.
+$cat animales_9.txt
+[
+class(top, none, [], [], []),
+
+class(animales, top, [], [], []),
+
+class(aves, animales,
+     [[vuelan,0],[not(nadan),0]],
+     [],
+     []
+     ),
+
+class(aguilas, aves,
+     [],
+     [[comen=>peces,0]],
+     [
+          [id=>pedro,[[tam=>grande,0]],[[not(amigo=>arturo),0]]]
+     ]
+     ),
+
+class(pinguino, aves,
+     [[not(vuelan),0],[nadan,0]],
+     [],
+     [
+          [id=>arturo,[[listo,0]],[[amigo=>pedro,0]]]
+     ]
+     ),
+
+class(ornitorrincos, mamiferos,
+     [[oviparos,0]],
+     [],
+     []
+     ),
+
+class(mamiferos, animales,
+     [[not(oviparos),0]],
+     [],
+     []
+     ),
+
+class(peces, animales,
+     [[not(bailan),0]],
+     [[viven_en=>agua]],
+     [
+          [id=>nemo,[],[[amigo=>perry]]]
+     ]
+     )
+
+
+2. Eliminar propiedad de objeto:
+Antes de quitar la propiedad nemo => agente secreto. La agregamos porque no existe.
+?- open_kb('animales_8.txt', KB),
+   add_object_property(nemo, agente_secreto, yes, KB, KB1),
+   save_kb('animales_9.txt', KB1).
+Propiedad agregada al objeto exitosamente.
+KB = [class(top, none, [], [], []), class(animales, top, [], [], []), class(aves, animales, [[vuelan, 0], [not(nadan), 0]], [], []), class(aguilas, aves, [], [[comen=>peces, 0]], [[id=>pedro, [[...|...]], [...]]]), class(pinguino, aves, [[not(vuelan), 0], [nadan|...]], [], [[id=>arturo, [...]|...]]), class(ornitorrincos, mamiferos, [[oviparos|...]], [], []), class(mamiferos, animales, [[...|...]], [], []), class(peces, animales, [...|...], [...], [...])],
+KB1 = [class(top, none, [], [], []), class(animales, top, [], [], []), class(aves, animales, [[vuelan, 0], [not(nadan), 0]], [], []), class(aguilas, aves, [], [[comen=>peces, 0]], [[id=>pedro, [[...|...]], [...]]]), class(pinguino, aves, [[not(vuelan), 0], [nadan|...]], [], [[id=>arturo, [...]|...]]), class(ornitorrincos, mamiferos, [[oviparos|...]], [], []), class(mamiferos, animales, [[...|...]], [], []), class(peces, animales, [...|...], [...], [...])].
+$cat animales_9.txt
+[
+class(top, none, [], [], []),
+
+class(animales, top, [], [], []),
+
+class(aves, animales,
+     [[vuelan,0],[not(nadan),0]],
+     [],
+     []
+     ),
+
+class(aguilas, aves,
+     [],
+     [[comen=>peces,0]],
+     [
+          [id=>pedro,[[tam=>grande,0]],[[not(amigo=>arturo),0]]]
+     ]
+     ),
+
+class(pinguino, aves,
+     [[not(vuelan),0],[nadan,0]],
+     [],
+     [
+          [id=>arturo,[[listo,0]],[[amigo=>pedro,0]]]
+     ]
+     ),
+
+class(ornitorrincos, mamiferos,
+     [[oviparos,0]],
+     [],
+     []
+     ),
+
+class(mamiferos, animales,
+     [[not(oviparos),0]],
+     [],
+     []
+     ),
+
+class(peces, animales,
+     [[nadan,0],[not(bailan),0]],
+     [[viven_en=>agua]],
+     [
+          [id=>nemo,[[agente_secreto=>yes]],[[amigo=>perry]]]
+     ]
+     )
+Ahora sí, procedemos a quitarla.
+?- open_kb('animales_9.txt', KB),
+   rm_object_property(nemo, agente_secreto, KB, KB1),
+   save_kb('animales_10.txt', KB1).
+KB = [class(top, none, [], [], []), class(animales, top, [], [], []), class(aves, animales, [[vuelan, 0], [not(nadan), 0]], [], []), class(aguilas, aves, [], [[comen=>peces, 0]], [[id=>pedro, [[...|...]], [...]]]), class(pinguino, aves, [[not(vuelan), 0], [nadan|...]], [], [[id=>arturo, [...]|...]]), class(ornitorrincos, mamiferos, [[oviparos|...]], [], []), class(mamiferos, animales, [[...|...]], [], []), class(peces, animales, [...|...], [...], [...])],
+KB1 = [class(top, none, [], [], []), class(animales, top, [], [], []), class(aves, animales, [[vuelan, 0], [not(nadan), 0]], [], []), class(aguilas, aves, [], [[comen=>peces, 0]], [[id=>pedro, [[...|...]], [...]]]), class(pinguino, aves, [[not(vuelan), 0], [nadan|...]], [], [[id=>arturo, [...]|...]]), class(ornitorrincos, mamiferos, [[oviparos|...]], [], []), class(mamiferos, animales, [[...|...]], [], []), class(peces, animales, [...|...], [...], [...])] .
+
+Resultado: Se elimina la propiedad agente_secreto de nemo.
+$cat animales_10.txt
+[
+class(top, none, [], [], []),
+
+class(animales, top, [], [], []),
+
+class(aves, animales,
+     [[vuelan,0],[not(nadan),0]],
+     [],
+     []
+     ),
+
+class(aguilas, aves,
+     [],
+     [[comen=>peces,0]],
+     [
+          [id=>pedro,[[tam=>grande,0]],[[not(amigo=>arturo),0]]]
+     ]
+     ),
+
+class(pinguino, aves,
+     [[not(vuelan),0],[nadan,0]],
+     [],
+     [
+          [id=>arturo,[[listo,0]],[[amigo=>pedro,0]]]
+     ]
+     ),
+
+class(ornitorrincos, mamiferos,
+     [[oviparos,0]],
+     [],
+     []
+     ),
+
+class(mamiferos, animales,
+     [[not(oviparos),0]],
+     [],
+     []
+     ),
+
+class(peces, animales,
+     [[nadan,0],[not(bailan),0]],
+     [[viven_en=>agua]],
+     [
+          [id=>nemo,[],[[amigo=>perry]]]
+     ]
+     )
+
+
+(c) Eliminar relaciones
+1. Eliminar relación de clase:
+?- open_kb('animales_10.txt', KB),
+|       rm_class_relation(peces, viven_en, KB, KB1),
+|       save_kb('animales_11.txt', KB1).
+KB = [class(top, none, [], [], []), class(animales, top, [], [], []), class(aves, animales, [[vuelan, 0], [not(nadan), 0]], [], []), class(aguilas, aves, [], [[comen=>peces, 0]], [[id=>pedro, [[...|...]], [...]]]), class(pinguino, aves, [[not(vuelan), 0], [nadan|...]], [], [[id=>arturo, [...]|...]]), class(ornitorrincos, mamiferos, [[oviparos|...]], [], []), class(mamiferos, animales, [[...|...]], [], []), class(peces, animales, [...|...], [...], [...])],
+KB1 = [class(top, none, [], [], []), class(animales, top, [], [], []), class(aves, animales, [[vuelan, 0], [not(nadan), 0]], [], []), class(aguilas, aves, [], [[comen=>peces, 0]], [[id=>pedro, [[...|...]], [...]]]), class(pinguino, aves, [[not(vuelan), 0], [nadan|...]], [], [[id=>arturo, [...]|...]]), class(ornitorrincos, mamiferos, [[oviparos|...]], [], []), class(mamiferos, animales, [[...|...]], [], []), class(peces, animales, [...|...], [], [...])] .
+
+Resultado: Se elimina la relación viven_en de peces.
+$cat animales_11.txt
+[
+class(top, none, [], [], []),
+
+class(animales, top, [], [], []),
+
+class(aves, animales,
+     [[vuelan,0],[not(nadan),0]],
+     [],
+     []
+     ),
+
+class(aguilas, aves,
+     [],
+     [[comen=>peces,0]],
+     [
+          [id=>pedro,[[tam=>grande,0]],[[not(amigo=>arturo),0]]]
+     ]
+     ),
+
+class(pinguino, aves,
+     [[not(vuelan),0],[nadan,0]],
+     [],
+     [
+          [id=>arturo,[[listo,0]],[[amigo=>pedro,0]]]
+     ]
+     ),
+
+class(ornitorrincos, mamiferos,
+     [[oviparos,0]],
+     [],
+     []
+     ),
+
+class(mamiferos, animales,
+     [[not(oviparos),0]],
+     [],
+     []
+     ),
+
+class(peces, animales,
+     [[nadan,0],[not(bailan),0]],
+     [],
+     [
+          [id=>nemo,[],[[amigo=>perry]]]
+     ]
+     )
+
+
+2. Eliminar relación de objeto:
+?- open_kb('animales_11.txt', KB),
+|       rm_object_relation(nemo, amigo, KB, KB1),
+|       save_kb('animales_12.txt', KB1).
+KB = [class(top, none, [], [], []), class(animales, top, [], [], []), class(aves, animales, [[vuelan, 0], [not(nadan), 0]], [], []), class(aguilas, aves, [], [[comen=>peces, 0]], [[id=>pedro, [[...|...]], [...]]]), class(pinguino, aves, [[not(vuelan), 0], [nadan|...]], [], [[id=>arturo, [...]|...]]), class(ornitorrincos, mamiferos, [[oviparos|...]], [], []), class(mamiferos, animales, [[...|...]], [], []), class(peces, animales, [...|...], [], [...])],
+KB1 = [class(top, none, [], [], []), class(animales, top, [], [], []), class(aves, animales, [[vuelan, 0], [not(nadan), 0]], [], []), class(aguilas, aves, [], [[comen=>peces, 0]], [[id=>pedro, [[...|...]], [...]]]), class(pinguino, aves, [[not(vuelan), 0], [nadan|...]], [], [[id=>arturo, [...]|...]]), class(ornitorrincos, mamiferos, [[oviparos|...]], [], []), class(mamiferos, animales, [[...|...]], [], []), class(peces, animales, [...|...], [], [...])] .
+Resultado: Se elimina la relación amigo de nemo.
+$cat animales_12.txt
+[
+class(top, none, [], [], []),
+
+class(animales, top, [], [], []),
+
+class(aves, animales,
+     [[vuelan,0],[not(nadan),0]],
+     [],
+     []
+     ),
+
+class(aguilas, aves,
+     [],
+     [[comen=>peces,0]],
+     [
+          [id=>pedro,[[tam=>grande,0]],[[not(amigo=>arturo),0]]]
+     ]
+     ),
+
+class(pinguino, aves,
+     [[not(vuelan),0],[nadan,0]],
+     [],
+     [
+          [id=>arturo,[[listo,0]],[[amigo=>pedro,0]]]
+     ]
+     ),
+
+class(ornitorrincos, mamiferos,
+     [[oviparos,0]],
+     [],
+     []
+     ),
+
+class(mamiferos, animales,
+     [[not(oviparos),0]],
+     [],
+     []
+     ),
+
+class(peces, animales,
+     [[nadan,0],[not(bailan),0]],
+     [],
+     [
+          [id=>nemo,[],[]]
+     ]
+     )
+
+
+3. Modificar
+(a) Cambiar el nombre
+1. Cambiar nombre de clase:
+?- open_kb('animales_12.txt', KB),
+|       change_class_name(peces, peces_marinos, KB, KB1),
+|       save_kb('animales_13.txt', KB1).
+KB = [class(top, none, [], [], []), class(animales, top, [], [], []), class(aves, animales, [[vuelan, 0], [not(nadan), 0]], [], []), class(aguilas, aves, [], [[comen=>peces, 0]], [[id=>pedro, [[...|...]], [...]]]), class(pinguino, aves, [[not(vuelan), 0], [nadan|...]], [], [[id=>arturo, [...]|...]]), class(ornitorrincos, mamiferos, [[oviparos|...]], [], []), class(mamiferos, animales, [[...|...]], [], []), class(peces, animales, [...|...], [], [...])],
+KB1 = [class(top, none, [], [], []), class(animales, top, [], [], []), class(aves, animales, [[vuelan, 0], [not(nadan), 0]], [], []), class(aguilas, aves, [], [[comen=>peces, 0]], [[id=>pedro, [[...|...]], [...]]]), class(pinguino, aves, [[not(vuelan), 0], [nadan|...]], [], [[id=>arturo, [...]|...]]), class(ornitorrincos, mamiferos, [[oviparos|...]], [], []), class(mamiferos, animales, [[...|...]], [], []), class(peces_marinos, animales, [...|...], [], [...])] .
+Resultado: Se cambia el nombre de la clase peces a peces_marinos.
+$cat animales_13.txt
+[
+class(top, none, [], [], []),
+
+class(animales, top, [], [], []),
+
+class(aves, animales,
+     [[vuelan,0],[not(nadan),0]],
+     [],
+     []
+     ),
+
+class(aguilas, aves,
+     [],
+     [[comen=>peces,0]],
+     [
+          [id=>pedro,[[tam=>grande,0]],[[not(amigo=>arturo),0]]]
+     ]
+     ),
+
+class(pinguino, aves,
+     [[not(vuelan),0],[nadan,0]],
+     [],
+     [
+          [id=>arturo,[[listo,0]],[[amigo=>pedro,0]]]
+     ]
+     ),
+
+class(ornitorrincos, mamiferos,
+     [[oviparos,0]],
+     [],
+     []
+     ),
+
+class(mamiferos, animales,
+     [[not(oviparos),0]],
+     [],
+     []
+     ),
+
+class(peces_marinos, animales,
+     [[nadan,0],[not(bailan),0]],
+     [],
+     [
+          [id=>nemo,[],[]]
+     ]
+     )
+
+
+
+2. Cambiar nombre de objeto:
+?- open_kb('animales_13.txt', KB),
+|       change_object_name(nemo, dory, KB, KB1),
+|       save_kb('animales_14.txt', KB1).
+KB = [class(top, none, [], [], []), class(animales, top, [], [], []), class(aves, animales, [[vuelan, 0], [not(nadan), 0]], [], []), class(aguilas, aves, [], [[comen=>peces, 0]], [[id=>pedro, [[...|...]], [...]]]), class(pinguino, aves, [[not(vuelan), 0], [nadan|...]], [], [[id=>arturo, [...]|...]]), class(ornitorrincos, mamiferos, [[oviparos|...]], [], []), class(mamiferos, animales, [[...|...]], [], []), class(peces_marinos, animales, [...|...], [], [...])],
+KB1 = [class(top, none, [], [], []), class(animales, top, [], [], []), class(aves, animales, [[vuelan, 0], [not(nadan), 0]], [], []), class(aguilas, aves, [], [[comen=>peces, 0]], [[id=>pedro, [[...|...]], [...]]]), class(pinguino, aves, [[not(vuelan), 0], [nadan|...]], [], [[id=>arturo, [...]|...]]), class(ornitorrincos, mamiferos, [[oviparos|...]], [], []), class(mamiferos, animales, [[...|...]], [], []), class(peces_marinos, animales, [...|...], [], [...])] .
+Resultado: Se cambia el nombre del objeto nemo a dory.
+$cat animales_14.txt
+[
+class(top, none, [], [], []),
+
+class(animales, top, [], [], []),
+
+class(aves, animales,
+     [[vuelan,0],[not(nadan),0]],
+     [],
+     []
+     ),
+
+class(aguilas, aves,
+     [],
+     [[comen=>peces,0]],
+     [
+          [id=>pedro,[[tam=>grande,0]],[[not(amigo=>arturo),0]]]
+     ]
+     ),
+
+class(pinguino, aves,
+     [[not(vuelan),0],[nadan,0]],
+     [],
+     [
+          [id=>arturo,[[listo,0]],[[amigo=>pedro,0]]]
+     ]
+     ),
+
+class(ornitorrincos, mamiferos,
+     [[oviparos,0]],
+     [],
+     []
+     ),
+
+class(mamiferos, animales,
+     [[not(oviparos),0]],
+     [],
+     []
+     ),
+
+class(peces_marinos, animales,
+     [[nadan,0],[not(bailan),0]],
+     [],
+     [
+          [id=>dory,[],[]]
+     ]
+     )
+
+
+
+(b) Cambiar propiedades
+1. Cambiar propiedad de clase:
+?- open_kb('animales_14.txt', KB),
+|       change_value_class_property(peces_marinos, nadan, no, KB, KB1),
+|       save_kb('animales_15.txt', KB1).
+KB = [class(top, none, [], [], []), class(animales, top, [], [], []), class(aves, animales, [[vuelan, 0], [not(nadan), 0]], [], []), class(aguilas, aves, [], [[comen=>peces, 0]], [[id=>pedro, [[...|...]], [...]]]), class(pinguino, aves, [[not(vuelan), 0], [nadan|...]], [], [[id=>arturo, [...]|...]]), class(ornitorrincos, mamiferos, [[oviparos|...]], [], []), class(mamiferos, animales, [[...|...]], [], []), class(peces_marinos, animales, [...|...], [], [...])],
+KB1 = [class(top, none, [], [], []), class(animales, top, [], [], []), class(aves, animales, [[vuelan, 0], [not(nadan), 0]], [], []), class(aguilas, aves, [], [[comen=>peces, 0]], [[id=>pedro, [[...|...]], [...]]]), class(pinguino, aves, [[not(vuelan), 0], [nadan|...]], [], [[id=>arturo, [...]|...]]), class(ornitorrincos, mamiferos, [[oviparos|...]], [], []), class(mamiferos, animales, [[...|...]], [], []), class(peces_marinos, animales, [...|...], [], [...])] .
+Resultado: La propiedad nadan de peces_marinos cambia a no.
+$cat animales_15.txt
+[
+class(top, none, [], [], []),
+
+class(animales, top, [], [], []),
+
+class(aves, animales,
+     [[vuelan,0],[not(nadan),0]],
+     [],
+     []
+     ),
+
+class(aguilas, aves,
+     [],
+     [[comen=>peces,0]],
+     [
+          [id=>pedro,[[tam=>grande,0]],[[not(amigo=>arturo),0]]]
+     ]
+     ),
+
+class(pinguino, aves,
+     [[not(vuelan),0],[nadan,0]],
+     [],
+     [
+          [id=>arturo,[[listo,0]],[[amigo=>pedro,0]]]
+     ]
+     ),
+
+class(ornitorrincos, mamiferos,
+     [[oviparos,0]],
+     [],
+     []
+     ),
+
+class(mamiferos, animales,
+     [[not(oviparos),0]],
+     [],
+     []
+     ),
+
+class(peces_marinos, animales,
+     [[not(bailan),0],[nadan=>no]],
+     [],
+     [
+          [id=>dory,[],[]]
+     ]
+     )
+
+
+2. Cambiar propiedad de objeto:
+?- open_kb('animales_15.txt', KB),
+|       change_value_object_property(dory, nadan, no, KB, KB1),
+|       save_kb('animales_16.txt', KB1).
+KB = [class(top, none, [], [], []), class(animales, top, [], [], []), class(aves, animales, [[vuelan, 0], [not(nadan), 0]], [], []), class(aguilas, aves, [], [[comen=>peces, 0]], [[id=>pedro, [[...|...]], [...]]]), class(pinguino, aves, [[not(vuelan), 0], [nadan|...]], [], [[id=>arturo, [...]|...]]), class(ornitorrincos, mamiferos, [[oviparos|...]], [], []), class(mamiferos, animales, [[...|...]], [], []), class(peces_marinos, animales, [...|...], [], [...])],
+KB1 = [class(top, none, [], [], []), class(animales, top, [], [], []), class(aves, animales, [[vuelan, 0], [not(nadan), 0]], [], []), class(aguilas, aves, [], [[comen=>peces, 0]], [[id=>pedro, [[...|...]], [...]]]), class(pinguino, aves, [[not(vuelan), 0], [nadan|...]], [], [[id=>arturo, [...]|...]]), class(ornitorrincos, mamiferos, [[oviparos|...]], [], []), class(mamiferos, animales, [[...|...]], [], []), class(peces_marinos, animales, [...|...], [], [...])].
+Resultado: La propiedad nadan de dory cambia a no.
+$cat animales_16.txt
+[
+class(top, none, [], [], []),
+
+class(animales, top, [], [], []),
+
+class(aves, animales,
+     [[vuelan,0],[not(nadan),0]],
+     [],
+     []
+     ),
+
+class(aguilas, aves,
+     [],
+     [[comen=>peces,0]],
+     [
+          [id=>pedro,[[tam=>grande,0]],[[not(amigo=>arturo),0]]]
+     ]
+     ),
+
+class(pinguino, aves,
+     [[not(vuelan),0],[nadan,0]],
+     [],
+     [
+          [id=>arturo,[[listo,0]],[[amigo=>pedro,0]]]
+     ]
+     ),
+
+class(ornitorrincos, mamiferos,
+     [[oviparos,0]],
+     [],
+     []
+     ),
+
+class(mamiferos, animales,
+     [[not(oviparos),0]],
+     [],
+     []
+     ),
+
+class(peces_marinos, animales,
+     [[not(bailan),0],[nadan=>no]],
+     [],
+     [
+          [id=>dory,[[nadan=>no]],[]]
+     ]
+     )
+
+
+(c) Cambiar relaciones
+1. Cambiar relación de clase:
+?- open_kb('animales_16.txt', KB),
+|       change_value_class_relation(peces_marinos, viven_en, tierra, KB, KB1),
+|       save_kb('animales_17.txt', KB1).
+KB = [class(top, none, [], [], []), class(animales, top, [], [], []), class(aves, animales, [[vuelan, 0], [not(nadan), 0]], [], []), class(aguilas, aves, [], [[comen=>peces, 0]], [[id=>pedro, [[...|...]], [...]]]), class(pinguino, aves, [[not(vuelan), 0], [nadan|...]], [], [[id=>arturo, [...]|...]]), class(ornitorrincos, mamiferos, [[oviparos|...]], [], []), class(mamiferos, animales, [[...|...]], [], []), class(peces_marinos, animales, [...|...], [], [...])],
+KB1 = [class(top, none, [], [], []), class(animales, top, [], [], []), class(aves, animales, [[vuelan, 0], [not(nadan), 0]], [], []), class(aguilas, aves, [], [[comen=>peces, 0]], [[id=>pedro, [[...|...]], [...]]]), class(pinguino, aves, [[not(vuelan), 0], [nadan|...]], [], [[id=>arturo, [...]|...]]), class(ornitorrincos, mamiferos, [[oviparos|...]], [], []), class(mamiferos, animales, [[...|...]], [], []), class(peces_marinos, animales, [...|...], [...], [...])] .
+Resultado: La relación viven_en de peces_marinos cambia a tierra.
+$cat animales_17.txt
+[
+class(top, none, [], [], []),
+
+class(animales, top, [], [], []),
+
+class(aves, animales,
+     [[vuelan,0],[not(nadan),0]],
+     [],
+     []
+     ),
+
+class(aguilas, aves,
+     [],
+     [[comen=>peces,0]],
+     [
+          [id=>pedro,[[tam=>grande,0]],[[not(amigo=>arturo),0]]]
+     ]
+     ),
+
+class(pinguino, aves,
+     [[not(vuelan),0],[nadan,0]],
+     [],
+     [
+          [id=>arturo,[[listo,0]],[[amigo=>pedro,0]]]
+     ]
+     ),
+
+class(ornitorrincos, mamiferos,
+     [[oviparos,0]],
+     [],
+     []
+     ),
+
+class(mamiferos, animales,
+     [[not(oviparos),0]],
+     [],
+     []
+     ),
+
+class(peces_marinos, animales,
+     [[not(bailan),0],[nadan=>no]],
+     [[viven_en=>tierra]],
+     [
+          [id=>dory,[[nadan=>no]],[]]
+     ]
+     )
+
+
+2. Cambiar relación de objeto:
+?- open_kb('animales_17.txt', KB),
+|       change_value_object_relation(dory, amigo, pedro, KB, KB1),
+|       save_kb('animales_18.txt', KB1).
+KB = [class(top, none, [], [], []), class(animales, top, [], [], []), class(aves, animales, [[vuelan, 0], [not(nadan), 0]], [], []), class(aguilas, aves, [], [[comen=>peces, 0]], [[id=>pedro, [[...|...]], [...]]]), class(pinguino, aves, [[not(vuelan), 0], [nadan|...]], [], [[id=>arturo, [...]|...]]), class(ornitorrincos, mamiferos, [[oviparos|...]], [], []), class(mamiferos, animales, [[...|...]], [], []), class(peces_marinos, animales, [...|...], [...], [...])],
+KB1 = [class(top, none, [], [], []), class(animales, top, [], [], []), class(aves, animales, [[vuelan, 0], [not(nadan), 0]], [], []), class(aguilas, aves, [], [[comen=>peces, 0]], [[id=>pedro, [[...|...]], [...]]]), class(pinguino, aves, [[not(vuelan), 0], [nadan|...]], [], [[id=>arturo, [...]|...]]), class(ornitorrincos, mamiferos, [[oviparos|...]], [], []), class(mamiferos, animales, [[...|...]], [], []), class(peces_marinos, animales, [...|...], [...], [...])] .
+Resultado: La relación amigo de dory cambia a pedro.
+$cat animales_17.txt
+[
+class(top, none, [], [], []),
+
+class(animales, top, [], [], []),
+
+class(aves, animales,
+     [[vuelan,0],[not(nadan),0]],
+     [],
+     []
+     ),
+
+class(aguilas, aves,
+     [],
+     [[comen=>peces,0]],
+     [
+          [id=>pedro,[[tam=>grande,0]],[[not(amigo=>arturo),0]]]
+     ]
+     ),
+
+class(pinguino, aves,
+     [[not(vuelan),0],[nadan,0]],
+     [],
+     [
+          [id=>arturo,[[listo,0]],[[amigo=>pedro,0]]]
+     ]
+     ),
+
+class(ornitorrincos, mamiferos,
+     [[oviparos,0]],
+     [],
+     []
+     ),
+
+class(mamiferos, animales,
+     [[not(oviparos),0]],
+     [],
+     []
+     ),
+
+class(peces_marinos, animales,
+     [[not(bailan),0],[nadan=>no]],
+     [[viven_en=>tierra]],
+     [
+          [id=>dory,[[nadan=>no]],[]]
+     ]
+     )
+
+
+
+
