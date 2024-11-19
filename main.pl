@@ -33,6 +33,19 @@ atom_to_term(ATOM, TERM) :-
 
 :- op(800,xfx,'=>').
 
+%-----------------------------------
+%-----------------------------------
+%-----------------------------------
+% Estoy agregando éstas 3 líneas para que corra el programa hoy 11/19/2024 a las 12:09 AM
+
+:- discontiguous has_property/2.
+:- discontiguous has_negated_property/2.
+:- discontiguous has_relation/2.
+
+%-----------------------------------
+%-----------------------------------
+%-----------------------------------
+
 %-------------------------------------------------
 % Save KB
 %-------------------------------------------------
@@ -447,9 +460,13 @@ find_superclasses_f(Class, KB, SuperClasses) :-
 
 find_superclasses_f(_, _, []).
 
+%-----------------------------------
+%-----------------------------------
+%-----------------------------------
+% % Desde aqui estoy agregando hoy 11/19/2024 a las 12:09 AM
 
 %-----------------------------------
-%		Punto 2
+%               Punto 2
 %-----------------------------------
 %--------------------------------------------------
 % Añadir Clases y Objetos
@@ -463,6 +480,7 @@ add_class(ClaseNombre, ClaseMadre, KB, NuevaKB) :-
     ;
         append(KB, [class(ClaseNombre, ClaseMadre, [], [], [])], NuevaKB),
         write('Clase agregada exitosamente.'), nl
+
     ).
 
 % Añadir un objeto
@@ -474,6 +492,8 @@ add_object(NombreObjeto, ClaseNombre, KB, NuevaKB) :-
         write('Objeto agregado exitosamente.'), nl
     ;
         write('La clase especificada no existe.'), nl,
+
+
         NuevaKB = KB
     ).
 
@@ -492,25 +512,35 @@ add_class_property(ClaseNombre, Propiedad, Valor, KB, NuevaKB) :-
         NuevaKB = KB
     ).
 
+
 % Añadir una propiedad a un objeto
-add_object_property(NombreObjeto, Propiedad, Valor, KB, NuevaKB) :-
-    (select(class(ClaseNombre, ClaseMadre, Props, Relaciones, Objetos), KB, TempKB) ->
-        maplist(
-            ({NombreObjeto, Propiedad, Valor}/[Objeto, ObjetoActualizado]>>
-                (Objeto = [id=>NombreObjeto, PropiedadesObjeto, RelacionesObjeto] ->
-                    append(PropiedadesObjeto, [[Propiedad => Valor]], NuevasProps),
-                    ObjetoActualizado = [id=>NombreObjeto, NuevasProps, RelacionesObjeto]
-                ;
-                    ObjetoActualizado = Objeto
-                )
-            ),
-            Objetos, NuevosObjetos),
-        append(TempKB, [class(ClaseNombre, ClaseMadre, Props, Relaciones, NuevosObjetos)], NuevaKB),
-        write('Propiedad agregada al objeto exitosamente.'), nl
-    ;
-        write('El objeto o su clase no existen.'), nl,
-        NuevaKB = KB
-    ).
+add_object_property(ObjectName, Property, Value, KB, NewKB) :-
+    maplist(
+        ({ObjectName, Property, Value}/[Class, UpdatedClass]>>
+            (Class = class(ClassName, Parent, Props, Rels, Objects) ->
+                maplist(
+                    ({ObjectName, Property, Value}/[Obj, UpdatedObj]>>
+                        (Obj = [id=>ObjectName, ObjProps, ObjRels] ->
+                            (   \+ member([Property=>_], ObjProps), % Asegurar que no exista la propiedad
+                                append(ObjProps, [[Property=>Value]], UpdatedProps),
+                                UpdatedObj = [id=>ObjectName, UpdatedProps, ObjRels]
+                            )
+                        ;
+                            UpdatedObj = Obj
+                        )
+                    ),
+                    Objects, UpdatedObjects),
+                UpdatedClass = class(ClassName, Parent, Props, Rels, UpdatedObjects)
+            ;
+                UpdatedClass = Class
+            )
+        ),
+        KB, NewKB
+    ),
+    write('Propiedad agregada al objeto exitosamente.'), nl.
+
+
+
 
 %--------------------------------------------------
 % Añadir Relaciones
@@ -527,196 +557,317 @@ add_class_relation(ClaseNombre, Relacion, ClasesRelacionadas, KB, NuevaKB) :-
         NuevaKB = KB
     ).
 
+
 % Añadir una relación a un objeto
-add_object_relation(NombreObjeto, Relacion, ObjetosRelacionados, KB, NuevaKB) :-
-    (select(class(ClaseNombre, ClaseMadre, Props, Relaciones, Objetos), KB, TempKB) ->
-        maplist(
-            ({NombreObjeto, Relacion, ObjetosRelacionados}/[Objeto, ObjetoActualizado]>>
-                (Objeto = [id=>NombreObjeto, PropsObjeto, RelacionesObjeto] ->
-                    append(RelacionesObjeto, [[Relacion => ObjetosRelacionados]], NuevasRelacionesObjeto),
-                    ObjetoActualizado = [id=>NombreObjeto, PropsObjeto, NuevasRelacionesObjeto]
-                ;
-                    ObjetoActualizado = Objeto
-                )
-            ),
-            Objetos, NuevosObjetos),
-        append(TempKB, [class(ClaseNombre, ClaseMadre, Props, Relaciones, NuevosObjetos)], NuevaKB),
-        write('Relación agregada al objeto exitosamente.'), nl
-    ;
-        write('El objeto o su clase no existen.'), nl,
-        NuevaKB = KB
-    ).
-
-%-----------------------------------
-%		Punto 3
-%-----------------------------------
-%inciso a)
-% Predicado para eliminar una clase de la base de conocimientos
-rm_class(ClassName, CurrentKB, NewKB) :-
-    exclude(is_exact_class(ClassName), CurrentKB, NewKB).
-
-is_exact_class(ClassName, class(ClassName, _, _, _, _)).
-
-% Predicado para eliminar un objeto de la base de conocimientos
-rm_object(ObjectID, CurrentKB, NewKB) :-
-    maplist(remove_object_from_class(ObjectID), CurrentKB, UpdatedKB),
-    exclude(is_empty_class, UpdatedKB, NewKB).
-
-remove_object_from_class(ObjectID, class(Name, Superclass, Properties, Relations, Objects), class(Name, Superclass, Properties, Relations, UpdatedObjects)) :-
-    exclude(has_id(ObjectID), Objects, UpdatedObjects).
-
-% Predicado para verificar si un objeto tiene un identificador específico con el formato id=>ObjectID
-has_id(ObjectID, id=>ObjectID).
-
-% Predicado para verificar si una clase está vacía (sin objetos)
-is_empty_class(class(_, _, _, _, Objects)) :-
-    Objects == [].
+add_object_relation(ObjectName, Relation, RelatedObjects, KB, NewKB) :-
+    maplist(
+        ({ObjectName, Relation, RelatedObjects}/[Class, UpdatedClass]>>
+            (Class = class(ClassName, Parent, Props, Rels, Objects) ->
+                maplist(
+                    ({ObjectName, Relation, RelatedObjects}/[Obj, UpdatedObj]>>
+                        (Obj = [id=>ObjectName, ObjProps, ObjRels] ->
+                            (   \+ member([Relation=>_], ObjRels), % Asegurar que no exista la relación
+                                append(ObjRels, [[Relation=>RelatedObjects]], UpdatedRels),
+                                UpdatedObj = [id=>ObjectName, ObjProps, UpdatedRels]
+                            )
+                        ;
+                            UpdatedObj = Obj
+                        )
+                    ),
+                    Objects, UpdatedObjects),
+                UpdatedClass = class(ClassName, Parent, Props, Rels, UpdatedObjects)
+            ;
+                UpdatedClass = Class
+            )
+        ),
+        KB, NewKB
+    ),
+    write('Relación agregada al objeto exitosamente.'), nl.
 
 
 
-%inciso b
-% Predicado para eliminar una propiedad específica de una clase
-rm_class_property(ClassName, Property, CurrentKB, NewKB) :-
-    maplist(remove_class_property(ClassName, Property), CurrentKB, UpdatedKB),
-    NewKB = UpdatedKB.
+% Punto 3
+% Crear predicados para eliminar
 
-remove_class_property(ClassName, Property, class(Name, Superclass, Properties, Relations, Objects), class(Name, Superclass, UpdatedProperties, Relations, Objects)) :-
-    (Name == ClassName ->
-        exclude(==(Property), Properties, UpdatedProperties)
-    ;
-        UpdatedProperties = Properties
-    ).
+% Elimina una clase y sus objetos de la base de conocimientos.
+rm_class(ClassName, KB, NewKB) :-
+    exclude(is_class(ClassName), KB, NewKB).
 
-% Predicado para eliminar una propiedad específica de un objeto
-rm_object_property(ObjectID, Property, CurrentKB, NewKB) :-
-    maplist(remove_object_property_from_class(ObjectID, Property), CurrentKB, NewKB).
+is_class(ClassName, class(ClassName, _, _, _, _)).
 
-remove_object_property_from_class(ObjectID, Property, class(Name, Superclass, Properties, Relations, Objects), class(Name, Superclass, Properties, Relations, UpdatedObjects)) :-
-    maplist(remove_property_from_object(ObjectID, Property), Objects, UpdatedObjects).
+% Elimina un objeto específico de una clase.
 
-% Predicado para eliminar una propiedad específica de un objeto
-remove_property_from_object(ObjectID, Property, Object, UpdatedObject) :-
-    (Object =.. [id=>ObjectID | Props] ->
-        exclude(==(Property), Props, UpdatedProps),
-        UpdatedObject =.. [id=>ObjectID | UpdatedProps]
-    ;
-        UpdatedObject = Object
-    ).
+rm_object(ObjectName, KB, NewKB) :-
+    maplist(remove_object_from_class(ObjectName), KB, NewKB).
 
-%Inciso c)
-% Remove a relation from a class and maintain the order
+remove_object_from_class(ObjectName, class(ClassName, Parent, Props, Rels, Objects),
+                         class(ClassName, Parent, Props, Rels, UpdatedObjects)) :-
+    exclude(has_object_id(ObjectName), Objects, UpdatedObjects).
+
+% Si la clase no contiene el objeto, no se modifica
+remove_object_from_class(_, Class, Class).
+
+% Verifica si un objeto tiene el identificador dado
+has_object_id(ObjectName, [id=>ObjectName | _]).
+
+
+% Elimina una propiedad específica de una clase.
+
+rm_class_property(ClassName, Property, KB, NewKB) :-
+    maplist(remove_class_property(ClassName, Property), KB, NewKB).
+
+remove_class_property(ClassName, Property, class(ClassName, Parent, Props, Rels, Objects),
+                      class(ClassName, Parent, UpdatedProps, Rels, Objects)) :-
+    exclude(has_property(Property), Props, UpdatedProps).
+
+remove_class_property(_, _, Class, Class). % Si no es la clase objetivo, no se modifica.
+
+has_property(Property, [Property=>_]).
+
+
+% Elimina una propiedad específica de un objeto dentro de una clase
+
+rm_object_property(ObjectName, Property, KB, NewKB) :-
+    maplist(remove_object_property_from_class(ObjectName, Property), KB, NewKB).
+
+remove_object_property_from_class(ObjectName, Property,
+                                   class(ClassName, Parent, Props, Rels, Objects),
+                                   class(ClassName, Parent, Props, Rels, UpdatedObjects)) :-
+    maplist(remove_property_from_object(ObjectName, Property), Objects, UpdatedObjects).
+
+remove_property_from_object(ObjectName, Property, [id=>ObjectName, Props, Rels],
+                            [id=>ObjectName, UpdatedProps, Rels]) :-
+    exclude(has_property(Property), Props, UpdatedProps).
+
+remove_property_from_object(_, _, Object, Object). % Si no es el objeto, no se modifica.
+
+
+%  Elimina una relación específica de una clase.
+
 rm_class_relation(ClassName, Relation, KB, NewKB) :-
-    write('Buscando la clase: '), write(ClassName), nl,
-    select(class(ClassName, Parent, Methods, Properties, Instances), KB, RestKB),
-    write('Clase encontrada. Eliminando la relación: '), write(Relation), nl,
-    (member(Relation, Methods) ->
-        delete(Methods, Relation, NewMethods),
-        NewClass = class(ClassName, Parent, NewMethods, Properties, Instances),
-        append(RestKB, [NewClass], OrderedKB),
-        write('Clase modificada: '), write(NewClass), nl,
-        NewKB = OrderedKB,  % Mantener el orden original de la base de conocimientos
-        !
-    ;
-        write('La relación no se encontró en la clase.'), nl,
-        NewKB = KB
-    ).
+    maplist(remove_class_relation(ClassName, Relation), KB, NewKB).
 
-% Remove a relation from an object within a class and maintain the order
+remove_class_relation(ClassName, Relation, class(ClassName, Parent, Props, Rels, Objects),
+                      class(ClassName, Parent, Props, UpdatedRels, Objects)) :-
+    exclude(has_relation(Relation), Rels, UpdatedRels).
+
+remove_class_relation(_, _, Class, Class). % Si no es la clase objetivo, no se modifica.
+
+has_relation(Relation, [Relation=>_]).
+
+
+% Elimina una relación específica de un objeto dentro de una clase.
+
 rm_object_relation(ObjectName, Relation, KB, NewKB) :-
-    write('Buscando la clase que contiene el objeto: '), write(ObjectName), nl,
-    select(class(ClassName, Parent, Methods, Properties, Instances), KB, RestKB),
-    write('Clase encontrada: '), write(ClassName), nl,
-    % Verificar si hay una instancia con el formato id=>ObjectName
-    (member(id=>ObjectName, Instances) ->
-        write('Objeto encontrado en la clase: '), write(ObjectName), nl,
-        % Buscar y modificar la relación de las propiedades
-        (select(mimic=>yes, Instances, UpdatedInstances) ->
-            write('Relación encontrada y eliminada: '), write(Relation), nl,
-            % Reconstruir la clase con la instancia actualizada
-            NewClass = class(ClassName, Parent, Methods, Properties, UpdatedInstances),
-            append(RestKB, [NewClass], OrderedKB),
-            write('Clase modificada con objeto actualizado: '), write(NewClass), nl,
-            NewKB = OrderedKB,  % Mantener el orden original de la base de conocimientos
-            !
-        ;
-            write('La relación no se encontró en el objeto.'), nl,
-            NewKB = KB
-        )
-    ;
-    write('El objeto no fue encontrado en la clase.'), nl,
-    fail  % Si el objeto no se encuentra, falla para seguir buscando en otras clases
+    maplist(remove_object_relation_from_class(ObjectName, Relation), KB, NewKB).
+
+remove_object_relation_from_class(ObjectName, Relation,
+                                   class(ClassName, Parent, Props, Rels, Objects),
+                                   class(ClassName, Parent, Props, Rels, UpdatedObjects)) :-
+    maplist(remove_relation_from_object(ObjectName, Relation), Objects, UpdatedObjects).
+
+remove_relation_from_object(ObjectName, Relation, [id=>ObjectName, Props, Rels],
+                            [id=>ObjectName, Props, UpdatedRels]) :-
+    exclude(has_relation(Relation), Rels, UpdatedRels).
+
+remove_relation_from_object(_, _, Object, Object). % Si no es el objeto, no se modifica.
+
+
+
+%--------------------------------------------------
+% Punto 4: Cambiar valores en clases y objetos
+%--------------------------------------------------
+
+
+% Cambiar el nombre de una clase
+change_class_name(OldName, NewName, KB, NewKB) :-
+    maplist(update_class_name(OldName, NewName), KB, IntermediateKB),
+    update_parent_references(OldName, NewName, IntermediateKB, NewKB).
+
+% Actualizar el nombre de la clase en su definición
+update_class_name(OldName, NewName, class(OldName, Parent, Props, Rels, Objects),
+                  class(NewName, Parent, Props, Rels, Objects)) :- !.
+update_class_name(_, _, Class, Class). % No modificar si no es la clase objetivo.
+
+% Actualizar referencias a la clase como clase padre
+update_parent_references(_, _, [], []).
+update_parent_references(OldName, NewName, [class(Name, OldName, Props, Rels, Objects)|Rest], [class(Name, NewName, Props, Rels, Objects)|UpdatedRest]) :-
+    update_parent_references(OldName, NewName, Rest, UpdatedRest).
+update_parent_references(OldName, NewName, [Class|Rest], [Class|UpdatedRest]) :-
+    update_parent_references(OldName, NewName, Rest, UpdatedRest).
+
+
+
+
+% Cambiar el nombre de un objeto
+change_object_name(OldName, NewName, KB, NewKB) :-
+    maplist(update_object_name(OldName, NewName), KB, NewKB).
+
+% Actualizar el nombre del objeto dentro de su clase
+update_object_name(OldName, NewName, class(Name, Parent, Props, Rels, Objects),
+                   class(Name, Parent, Props, Rels, UpdatedObjects)) :-
+    maplist(rename_object(OldName, NewName), Objects, UpdatedObjects).
+update_object_name(_, _, Class, Class). % No modificar si no es la clase objetivo.
+
+% Renombrar el objeto en la lista de objetos
+rename_object(OldName, NewName, [id=>OldName, Props, Rels], [id=>NewName, Props, Rels]) :- !.
+rename_object(_, _, Object, Object). % No modificar si no es el objeto objetivo.
+
+
+
+% Cambiar el valor de una propiedad específica de una clase
+change_value_class_property(ClassName, Property, NewValue, KB, NewKB) :-
+    maplist(update_class_property(ClassName, Property, NewValue), KB, NewKB).
+
+update_class_property(ClassName, Property, NewValue,
+                      class(ClassName, Parent, Props, Rels, Objects),
+                      class(ClassName, Parent, UpdatedProps, Rels, Objects)) :-
+    % Eliminar cualquier conflicto previo (not(Property) o Property=>_)
+    exclude(has_property(Property), Props, CleanedProps),
+    exclude(has_negated_property(Property), CleanedProps, FilteredProps),
+    % Añadir la nueva propiedad
+    append(FilteredProps, [[Property=>NewValue]], UpdatedProps).
+
+update_class_property(_, _, _, Class, Class). % No modificar si no es la clase objetivo.
+
+% Verificar si la propiedad ya existe
+has_property(Property, [Property|_]).
+has_property(Property, [Property=>_]).
+
+% Verificar si la negación de la propiedad existe
+has_negated_property(Property, [not(Property)|_]).
+
+
+
+
+
+
+% Cambiar el valor de una propiedad específica de un objeto
+change_value_object_property(ObjectName, Property, NewValue, KB, NewKB) :-
+    maplist(
+        ({ObjectName, Property, NewValue}/[Class, UpdatedClass]>>
+            (Class = class(ClassName, Parent, Props, Rels, Objects) ->
+                % Actualizar la propiedad en el objeto correspondiente
+                maplist(
+                    ({ObjectName, Property, NewValue}/[Obj, UpdatedObj]>>
+                        (Obj = [id=>ObjectName, ObjProps, ObjRels] ->
+                            % Eliminar cualquier conflicto previo (Property=>_ o not(Property))
+                            exclude(has_property(Property), ObjProps, FilteredProps),
+                            exclude(has_negated_property(Property), FilteredProps, CleanedProps),
+                            % Añadir la nueva propiedad
+                            append(CleanedProps, [[Property=>NewValue]], UpdatedProps),
+                            UpdatedObj = [id=>ObjectName, UpdatedProps, ObjRels]
+                        ;
+                            UpdatedObj = Obj
+                        )
+                    ),
+                    Objects, UpdatedObjects),
+                UpdatedClass = class(ClassName, Parent, Props, Rels, UpdatedObjects)
+            ;
+                UpdatedClass = Class
+            )
+        ),
+        KB, NewKB
+    ).
+
+% Verificar si la propiedad ya existe
+has_property(Property, [Property=>_]).
+
+% Verificar si la negación de la propiedad existe
+has_negated_property(Property, [not(Property)|_]).
+
+
+
+
+% Cambiar con quién mantiene una relación específica una clase
+change_value_class_relation(ClassName, Relation, NewRelatedClasses, KB, NewKB) :-
+    maplist(update_class_relation(ClassName, Relation, NewRelatedClasses), KB, NewKB).
+
+
+% Actualizar la relación específica de una clase
+update_class_relation(ClassName, Relation, NewRelatedClasses,
+                      class(ClassName, Parent, Props, Rels, Objects),
+                      class(ClassName, Parent, Props, UpdatedRels, Objects)) :-
+    % Eliminar la relación existente
+    exclude(has_relation(Relation), Rels, FilteredRels),
+    % Añadir la nueva relación
+    append(FilteredRels, [[Relation=>NewRelatedClasses]], UpdatedRels).
+
+update_class_relation(_, _, _, Class, Class). % No modificar si no es la clase objetivo.
+
+% Verificar si una relación específica existe
+has_relation(Relation, [Relation=>_]).
+
+
+
+
+
+
+% Cambiar con quién mantiene una relación específica un objeto
+change_value_object_relation(ObjectName, Relation, NewRelatedObjects, KB, NewKB) :-
+    maplist(update_object_relation(ObjectName, Relation, NewRelatedObjects), KB, NewKB).
+
+update_object_relation(ObjectName, Relation, NewRelatedObjects,
+                       class(Name, Parent, Props, Rels, Objects),
+                       class(Name, Parent, Props, Rels, UpdatedObjects)) :-
+    maplist(update_object_specific_relation(ObjectName, Relation, NewRelatedObjects), Objects, UpdatedObjects).
+
+update_object_specific_relation(ObjectName, Relation, NewRelatedObjects,
+                                [id => ObjectName, Props, Rels],
+                                [id => ObjectName, Props, UpdatedRels]) :-
+    % Eliminar cualquier relación conflictiva
+    exclude(has_relation(Relation), Rels, FilteredRels),
+    % Añadir la nueva relación
+    append(FilteredRels, [[Relation => NewRelatedObjects]], UpdatedRels).
+
+update_object_specific_relation(_, _, _, Object, Object). % No modificar si no es el objeto objetivo.
+
+% Verificar si la relación ya existe
+has_relation(Relation, [Relation => _]).
+
+
+
+% Obtener el valor de una propiedad en una clase
+class_property_value(ClassName, Property, KB, Value) :-
+    % Verificar si la propiedad está definida directamente o por herencia
+    (   find_property_in_class(ClassName, Property, KB, DirectValue)
+    ->  Value = DirectValue
+    ;   Value = unknown % Si no se encuentra la propiedad, retorna 'unknown'
+    ).
+
+% Buscar la propiedad en la clase actual o en sus superclases
+find_property_in_class(ClassName, Property, KB, Value) :-
+    member(class(ClassName, ParentClass, Properties, _, _), KB),
+    % Verificar si la propiedad está definida directamente en la clase actual
+    (   member([Property, 0], Properties)
+    ->  Value = yes
+    ;   member([not(Property), 0], Properties)
+    ->  Value = no
+    ;   % Si no está en la clase actual, buscar en la superclase
+        ParentClass \= none,
+        find_property_in_class(ParentClass, Property, KB, Value)
     ).
 
 
-
+% Obtener el valor de una propiedad de un objeto
+object_property_value(ObjectName, Property, KB, Value) :-
+    member(class(_, _, _, _, Objects), KB),
+    member([id=>ObjectName, ObjectProps, _], Objects),
+    (
+        % Formato Propiedad=>Valor
+        member([Property=>PropValue, _], ObjectProps)
+    ->  Value = PropValue
+    ;   % Formato Propiedad, Flag
+        member([Property, Flag], ObjectProps),
+        Value = Flag
+    ;   % No encontrada
+        Value = unknown
+    ).
 
 %-----------------------------------
-%		Punto 4
 %-----------------------------------
-% Inciso a
-% Modificar el nombre de una clase
-% Predicado para cambiar el nombre de una clase
-change_class_name(NombreClaseActual, NuevoNombreClase, KB, NuevaKB) :-
-    select(class(NombreClaseActual, ClaseMadre, Propiedades, Relaciones, Objetos), KB, KBRestante),
-    append(KBRestante, [class(NuevoNombreClase, ClaseMadre, Propiedades, Relaciones, Objetos)], NuevaKB).
-% Modificar el nombre de un objeto
-% Predicado para cambiar el nombre de un objeto dentro de una clase
-change_object_name(NombreClase, NombreObjetoActual, NuevoNombreObjeto, KB, NuevaKB) :-
-    select(class(NombreClase, ClaseMadre, Propiedades, Relaciones, Objetos), KB, KBRestante),
-    maplist(
-        ({NombreObjetoActual, NuevoNombreObjeto}/[Objeto, ObjetoModificado]>>
-            (Objeto = [id=>NombreObjetoActual, PropiedadesObjeto, RelacionesObjeto] ->
-             ObjetoModificado = [id=>NuevoNombreObjeto, PropiedadesObjeto, RelacionesObjeto] ;
-             ObjetoModificado = Objeto)),
-        Objetos, NuevosObjetos),
-    append(KBRestante, [class(NombreClase, ClaseMadre, Propiedades, Relaciones, NuevosObjetos)], NuevaKB).
-% Inciso b
-% Predicado para modificar el valor de una propiedad específica de una clase
-change_value_class_property(NombreClase, Propiedad, NuevoValor, KB, NuevaKB) :-
-    select(class(NombreClase, ClaseMadre, Propiedades, Relaciones, Objetos), KB, KBRestante),
-    maplist(
-        ({Propiedad, NuevoValor}/[PropiedadActual=>ValorActual, PropiedadActual=>ValorModificado]>>
-            ( (PropiedadActual == Propiedad) -> ValorModificado=NuevoValor ; ValorModificado=ValorActual )),
-        Propiedades, NuevasPropiedades),
-    append(KBRestante, [class(NombreClase, ClaseMadre, NuevasPropiedades, Relaciones, Objetos)], NuevaKB).
-% Predicado para modificar el valor de una propiedad específica de un objeto dentro de una clase
-change_value_object_property(NombreClase, NombreObjeto, Propiedad, NuevoValor, KB, NuevaKB) :-
-    select(class(NombreClase, ClaseMadre, Propiedades, Relaciones, Objetos), KB, KBRestante),
-    maplist(
-        ({NombreObjeto, Propiedad, NuevoValor}/[Objeto, ObjetoModificado]>>
-            (Objeto = [id=>NombreObjeto, PropiedadesObjeto, RelacionesObjeto] ->
-             maplist(
-                ({Propiedad, NuevoValor}/[PropiedadActual=>ValorActual, PropiedadActual=>ValorModificado]>>
-                    ( (PropiedadActual == Propiedad) -> ValorModificado=NuevoValor ; ValorModificado=ValorActual )),
-                PropiedadesObjeto, NuevasPropiedadesObjeto),
-             ObjetoModificado = [id=>NombreObjeto, NuevasPropiedadesObjeto, RelacionesObjeto] ;
-             ObjetoModificado = Objeto)),
-        Objetos, NuevosObjetos),
-    append(KBRestante, [class(NombreClase, ClaseMadre, Propiedades, Relaciones, NuevosObjetos)], NuevaKB).
-% Inciso c
-% Predicado para modificar una relación específica de una clase
-change_value_class_relation(NombreClase, Relacion, NuevasClasesRelacionadas, KB, NuevaKB) :-
-    select(class(NombreClase, ClaseMadre, Propiedades, Relaciones, Objetos), KB, KBRestante),
-    maplist(
-        ({Relacion, NuevasClasesRelacionadas}/[RelacionActual=>RelacionadosActuales, RelacionActual=>RelacionModificada]>>
-            ( (RelacionActual == Relacion) -> RelacionModificada=NuevasClasesRelacionadas ; RelacionModificada=RelacionadosActuales )),
-        Relaciones, NuevasRelaciones),
-    append(KBRestante, [class(NombreClase, ClaseMadre, Propiedades, NuevasRelaciones, Objetos)], NuevaKB).
-% Predicado para modificar una relación específica de un objeto dentro de una clase
-change_value_object_relation(NombreClase, NombreObjeto, Relacion, NuevosObjetosRelacionados, KB, NuevaKB) :-
-    select(class(NombreClase, ClaseMadre, Propiedades, Relaciones, Objetos), KB, KBRestante),
-    maplist(
-        ({NombreObjeto, Relacion, NuevosObjetosRelacionados}/[Objeto, ObjetoModificado]>>
-            (Objeto = [id=>NombreObjeto, PropiedadesObjeto, RelacionesObjeto] ->
-             maplist(
-                ({Relacion, NuevosObjetosRelacionados}/[RelacionActual=>RelacionadosActuales, RelacionActual=>RelacionModificada]>>
-                    ( (RelacionActual == Relacion) -> RelacionModificada=NuevosObjetosRelacionados ; RelacionModificada=RelacionadosActuales )),
-                RelacionesObjeto, NuevasRelacionesObjeto),
-             ObjetoModificado = [id=>NombreObjeto, PropiedadesObjeto, NuevasRelacionesObjeto] ;
-             ObjetoModificado = Objeto)),
-        Objetos, NuevosObjetos),
-    append(KBRestante, [class(NombreClase, ClaseMadre, Propiedades, Relaciones, NuevosObjetos)], NuevaKB).
-
+%-----------------------------------
+% Hasta aqui agregué hoy 11/19/2024 a las 12:09 AM
 
 
    % Predicado para imprimir la información de una clase específica
