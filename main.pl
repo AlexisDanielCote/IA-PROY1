@@ -192,8 +192,8 @@ relation_extension(Relation, KB, Result) :-
             % Desempaquetar los atributos para buscar la propiedad
             flatten(Relations, FlatRelations),
             % Sobrescribir el valor si la propiedad está definida en los atributos de la instancia
-            (   member(Relation=>RelationValue, FlatRelations) 
-                -> Value = RelationValue, write(Value), nl
+            (   member([Relation=>RelationValue, _], FlatRelations) 
+                -> Value = FlatRelations
             ;  
                 member(not(Relation=>RelationValue), FlatRelations) 
                 -> Value = RelationValue
@@ -232,10 +232,10 @@ check_relation_with_inheritance_relation(Relation, Class, ParentClass, KB, Value
     (   member(class(Class, _, _, Relationes, _), KB),
         (  member([Relation=>RelationValue, 0], Relationes) % Propiedad afirmativa en la clase actual
         ->  look_ids(RelationValue, KB, IdLook),
-            Value = IdLook, write(Value)
+            Value = IdLook
         ;   member([not(Relation=>RelationValue), 0], Relationes) % Propiedad negada en la clase actual
         ->  look_ids(RelationValue, KB, IdLook),
-            Value = IdLook, write(Value)
+            Value = IdLook
         ;   % Si no está en la clase actual y hay una clase padre, verifica en la clase padre
             ParentClass \= none,
             check_relation_with_inheritance_relation(Relation, ParentClass, _, KB, Value)
@@ -298,95 +298,98 @@ find_superclasses(Class, KB, SuperClasses) :-
 find_superclasses(_, _, []).
 
 %inciso e)
-% Predicado principal para encontrar todas las propiedades de un objeto
-properties_of_individual(Object, KB, Properties) :-
-    findall(
-        Property:Value,
-        (
-            member(class(_, _, _, _, Instances), KB),
-            member([id=>Object, Attributes, _], Instances),
-            member(Property=>Value, Attributes),
-            ! % Corte para detener la búsqueda de más soluciones una vez encontrada una propiedad
-        ),
-        DirectProperties
-    ),
-    classes_of_individual_e(Object, KB, Classes),
-    find_inherited_properties(Classes, KB, InheritedProperties),
-    append(DirectProperties, InheritedProperties, AllProperties),
-    sort(AllProperties, Properties), % Elimina duplicados y ordena
-    !. % Corte para detener la búsqueda después de obtener el resultado final
+% Obtener todas las propiedades de un individuo
+properties_of_individual(Individual, KB, Result) :-
+    member(class(ClassName, ClassParent, _, _, _), KB),
+    % Buscar la clase que contiene al individuo
+    member(class(ClassName, _, _, _, Instances), KB),
+    % Verificar si el individuo tiene una lista de propiedades definida
+    member([id=>Individual, IndividualProps,_], Instances),
+    (
+        % Caso 1: El individuo tiene una lista de propiedades definida
+        IndividualProps \= [] ->
+        findall(Prop, member([Prop, _], IndividualProps), ResultF)
+    ), class_properties_indi(ClassName, ClassParent, KB, ResultF, Result1), 
+    clean_properties(Result1, Result),!.
+    
+% Obtener todas las propiedades de una clase (incluidas las de las superclases)
+class_properties_indi(ClassName, SuperClass, KB, ResultF, Result) :-
+    % Encontrar la definición de la clase
+    member(class(ClassName, SuperClass, ClassProps, _, _), KB),
+    write(ClassProps), 
+    (
+        ClassProps \= [] -> append(ClassProps, ResultF, Result)
+        %write(CurrentProps), nl
+        ;
+        % Extraer propiedades de la clase actual
+        findall(Prop, member([Prop, _], ClassProps), CurrentProps),
+        write(CurrentProps),
+        % Recursivamente obtener las propiedades de las superclases
+        ->(
+            SuperClass \= none ->
+            class_properties_indi(SuperClass, _, KB, ResultF, SuperProps);
+            SuperProps = []
+        )
+    ).
+    % Combinar propiedades actuales con las heredadas
+   
+% Predicado para limpiar la lista de propiedades y eliminar los números
+clean_properties([], []). % Caso base: lista vacía
+clean_properties([[Prop, _] | Tail], [Prop | CleanTail]) :- % Eliminar números de cada propiedad
+    clean_properties(Tail, CleanTail).
+clean_properties([Prop | Tail], [Prop | CleanTail]) :- % Si ya es una propiedad limpia, conservarla
+    clean_properties(Tail, CleanTail).
 
-% Predicado para encontrar todas las propiedades de una clase
-class_properties(Class, KB, Properties) :-
-    findall(
-        Property,
-        (
-            member(class(Class, _, ClassProperties, _, _), KB),
-            member(Property, ClassProperties),
-            ! % Corte para detener la búsqueda de más soluciones
-        ),
-        DirectProperties
-    ),
-    find_superclasses_e(Class, KB, SuperClasses),
-    find_inherited_properties(SuperClasses, KB, InheritedProperties),
-    append(DirectProperties, InheritedProperties, AllProperties),
-    sort(AllProperties, Properties), % Elimina duplicados y ordena
-    !. % Corte para finalizar la búsqueda
+% Obtener todas las propiedades de una clase (incluidas las de las superclases)
+class_properties(ClassName, KB, Result) :-
+    % Buscar la clase actual
+    member(class(ClassName, SuperClass, ClassProps, _, _), KB),
+    % Extraer propiedades de la clase actual
+    findall(Prop, member([Prop, _], ClassProps), CurrentProps),
+    (
+        % Caso 1: La clase tiene una superclase
+        SuperClass \= none ->
+        class_properties(SuperClass, KB, SuperProps),
+        append(SuperProps, CurrentProps, CombinedProps),
+        % Quitar números de las propiedades combinadas
+        clean_properties(CombinedProps, Result)
+    ;
+        % Caso 2: No hay superclase, devolver solo las propiedades actuales
+        clean_properties(CurrentProps, Result)
+    ), !.
 
-% Predicado auxiliar para encontrar las propiedades heredadas de una lista de clases
-find_inherited_properties([], _, []).
-find_inherited_properties([Class | Rest], KB, Properties) :-
-    class_properties(Class, KB, ClassProperties),
-    find_inherited_properties(Rest, KB, RestProperties),
-    append(ClassProperties, RestProperties, Properties),
-    !. % Corte para evitar seguir buscando
-
-% Predicado para encontrar todas las clases a las que pertenece un objeto
-classes_of_individual_e(Object, KB, Classes) :-
-    findall(
-        Class,
-        (
-            member(class(Class, _, _, _, Instances), KB),
-            member([id=>Object | _], Instances),
-            ! % Corte para detener la búsqueda de más soluciones
-        ),
-        DirectClasses
-    ),
-    find_superclasses_list_e(DirectClasses, KB, AllClasses),
-    sort(AllClasses, Classes), % Elimina duplicados y ordena
-    !. % Corte para finalizar la búsqueda
-
-% Predicado auxiliar para encontrar las superclases de una lista de clases
-find_superclasses_list_e([], _, []).
-find_superclasses_list_e([Class | Rest], KB, [Class | SuperClasses]) :-
-    find_superclasses_e(Class, KB, ClassSuperClasses),
-    find_superclasses_list_e(Rest, KB, RestSuperClasses),
-    append(ClassSuperClasses, RestSuperClasses, SuperClasses),
-    !. % Corte para evitar seguir buscando
-
-% Predicado auxiliar para encontrar las superclases de una clase de forma recursiva
-find_superclasses_e(Class, KB, SuperClasses) :-
-    member(class(Class, SuperClass, _, _, _), KB),
-    SuperClass \= none,
-    find_superclasses_e(SuperClass, KB, ParentSuperClasses),
-    SuperClasses = [SuperClass | ParentSuperClasses],
-    !. % Corte para evitar seguir buscando
-
-find_superclasses_e(_, _, []).
 
 %inciso f)
-% Predicado principal para encontrar todas las relaciones de un objeto
 % Regla para encontrar las relaciones específicas de un individuo en la base de conocimientos.
 relations_of_individual(Individual, KB, Relations) :-
     findall(
         Property,
         (
             member(class(_, _, _, _, Properties), KB),
-            member([id=>Individual | Props], Properties),
-            member(Property, Props)
+            member([id=>Individual, _, Props], Properties),
+            member([Property, _], Props),
+            append(Props, InitialValue, Result)
         ),
-        Relations
-    ).
+        RelationsUnfiltered
+    ),
+    sort(RelationsUnfiltered, Relations).
+
+% Predicado principal para encontrar todas las clases de un individuo
+class_of_individual(Individual, KB, Classes) :-
+    % Encuentra la clase del individuo
+    member(class(Class, _, _, _, Instances), KB),
+    member(id=>Individual, Instances),
+    % Encuentra todas las clases ascendentes (herencia)
+    find_all_classes(Class, KB, Classes).
+
+% Predicado recursivo para encontrar todas las clases heredadas
+find_all_classes(Class, KB, [Class|ParentClasses]) :-
+    member(class(Class, ParentClass, _, _, _), KB),
+    ParentClass \= none, % Si no es la clase raíz
+    find_all_classes(ParentClass, KB, ParentClasses).
+find_all_classes(Class, KB, [Class]) :-
+    member(class(Class, none, _, _, _), KB). % Clase raíz (sin padres)
+
 
 
 % Predicado para encontrar todas las relaciones de una clase
@@ -443,7 +446,6 @@ find_superclasses_f(Class, KB, SuperClasses) :-
     !. % Corte para evitar seguir buscando
 
 find_superclasses_f(_, _, []).
-
 
 
 %-----------------------------------
