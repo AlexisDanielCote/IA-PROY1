@@ -38,7 +38,19 @@ KB = [class(top, none, [], [], []), class(animales, top, [], [], []), class(aves
 Classes_of = [animales, aves, pinguino, top].
 
 
+% Ejemplo de Ejecución Punto 1 inciso e
+?- open_kb('animales.txt',KB),properties_of_individual(arturo,KB,Properties_Of).
+KB = [class(top, none, [], [], []), class(animales, top, [], [], []), class(aves, animales, [[vuelan, 0], [not(nadan), 0]], [], []), class(peces, animales, [[nadan, 0], [not(bailan), 0]], [], [[id=>nemo, [], []]]), class(mamiferos, animales, [[not(oviparos), 0]], [], []), class(aguilas, aves, [], [[... => ...|...]], [[... => ...|...]]), class(pinguino, aves, [[...|...]|...], [], [[...|...]]), class(ornitorrincos, mamiferos, [...], [], [])],
+Properties_Of = [listo] .
 
+?- open_kb('animales.txt',KB),properties_of_individual(pedro,KB,Properties_Of).
+KB = [class(top, none, [], [], []), class(animales, top, [], [], []), class(aves, animales, [[vuelan, 0], [not(nadan), 0]], [], []), class(peces, animales, [[nadan, 0], [not(bailan), 0]], [], [[id=>nemo, [], []]]), class(mamiferos, animales, [[not(oviparos), 0]], [], []), class(aguilas, aves, [], [[... => ...|...]], [[... => ...|...]]), class(pinguino, aves, [[...|...]|...], [], [[...|...]]), class(ornitorrincos, mamiferos, [...], [], [])],
+Properties_Of = [tam=>grande, vuelan, not(nadan)] .
+
+?- open_kb('animales.txt',KB),properties_of_individual(nemo,KB,Properties_Of).
+KB = [class(top, none, [], [], []), class(animales, top, [], [], []), class(aves, animales, [[vuelan, 0], [not(nadan), 0]], [], []), class(peces, animales, [[nadan, 0], [not(bailan), 0]], [], [[id=>nemo, [], []]]), class(mamiferos, animales, [[not(oviparos), 0]], [], []), class(aguilas, aves, [], [[... => ...|...]], [[... => ...|...]]), class(pinguino, aves, [[...|...]|...], [], [[...|...]]), class(ornitorrincos, mamiferos, [...], [], [])],
+Properties_Of = [nadan, not(bailan)] .
+% Hasta aqui acaba ejecucion inciso e
 
 
 
