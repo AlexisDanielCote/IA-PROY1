@@ -97,7 +97,11 @@ ejemplo:-
 %-----------------------------------
 %		Punto 1
 %-----------------------------------
-% (a) Extensión de una clase
+
+%-----------------------------------
+%		INCISO A
+%-----------------------------------
+
 % Predicado para encontrar la extensión de una clase y sus subclases.
 class_extension(ClassName, KnowledgeBase, Extension) :-
     findall(InstanceID,
@@ -118,7 +122,10 @@ find_subclass_instances([SubClass|Rest], KnowledgeBase, AllInstances) :-
     find_subclass_instances(Rest, KnowledgeBase, RestInstances),
     append(SubClassInstances, RestInstances, AllInstances).
 
-%inciso b
+%-----------------------------------
+%		INCISO B
+%-----------------------------------
+
 % Predicado para buscar todas las instancias que tienen una propiedad específica y devolver sus valores en el formato Id:Value
 property_extension(Property, KB, Result) :-
     % Buscar las instancias que tienen la propiedad mediante herencia
@@ -135,7 +142,7 @@ property_extension(Property, KB, Result) :-
             flatten(Attributes, FlatAttributes),
             % Sobrescribir el valor si la propiedad está definida en los atributos de la instancia
             (   member(Property=>AttributeValue, FlatAttributes) 
-                -> Value = AttributeValue, write(Value),nl
+                -> Value = AttributeValue
             ;   Value = InitialValue
             )
         ),
@@ -188,7 +195,6 @@ process_values(Values, FinalValue) :-
         ; FinalValue = no % Si todo es 'no', selecciona 'no'
     ).
 
-% Predicado principal
 filter_list(List, Result) :-
     (   has_other_values(List) ->
         exclude(yes_no_pair, List, Result)
@@ -208,7 +214,9 @@ yes_no_pair(_Key:Value) :-
     Value = yes;
     Value = no.
 
-%Inciso C)
+%-----------------------------------
+%		INCISO C
+%-----------------------------------
 
 relation_extension(Relation, KB, Result) :-
     % Buscar las instancias que tienen la propiedad mediante herencia
@@ -325,7 +333,9 @@ decompose_relation_first(Term, Result) :-
 
 first_element([Head | _], Head).
 
-%inciso d)
+%-----------------------------------
+%		INCISO D
+%-----------------------------------
 % Predicado principal para encontrar todas las clases a las que pertenece un objeto
 classes_of_individual(Object, KB, Classes) :-
     findall(
@@ -357,8 +367,10 @@ find_superclasses(Class, KB, SuperClasses) :-
 
 find_superclasses(_, _, []).
 
+%-----------------------------------
+%		INCISO E
+%-----------------------------------
 
-% (e) Propiedades de un Objeto
 % Obtener todas las propiedades de un individuo (directas e indirectas)
 properties_of_individual(Individual, KB, SimplifiedProperties) :-
     % Propiedades directas del individuo
@@ -370,7 +382,7 @@ properties_of_individual(Individual, KB, SimplifiedProperties) :-
     % Combinar propiedades directas e indirectas
     append(DirectProperties, InheritedProperties, AllProperties),
     % Simplificar propiedades (eliminar conflictos y duplicados)
-    simplify_properties(AllProperties, SimplifiedProperties).
+    simplify_properties(AllProperties, SimplifiedProperties), !.
 
 % Propiedades directas de un objeto
 direct_object_property(Individual, Property, KB) :-
@@ -428,11 +440,14 @@ class_properties(NombreClase, BaseConocimientos, Propiedades) :-
     % Buscar la clase específica en la base de conocimientos
     member(class(NombreClase, _, PropiedadesClase, _, _), BaseConocimientos),
     % Extraer las propiedades de la clase
-    Propiedades = PropiedadesClase.
+    Propiedades = PropiedadesClase, !.
 
 
 
-% (f) Relaciones de un objeto
+%-----------------------------------
+%		INCISO f
+%-----------------------------------
+
 % Predicado principal para obtener las relaciones de un objeto
 relations_of_individual(ObjectName, KB, Relations_Of) :-
     % Buscar el objeto en las clases y obtener sus relaciones directas
@@ -469,13 +484,6 @@ find_class_relations([ClassName|Rest], KB, AllRelations) :-
     find_class_relations(Rest, KB, RestRelations),
     append(FormattedClassRelations, RestRelations, AllRelations).
 
-
-
-
-
-
-
-
 % --------------------------------------------------
 % Relaciones de una clase
 % --------------------------------------------------
@@ -507,18 +515,13 @@ class_of_individual(Individual, KB, ParentClass) :-
     member(class(ClassName, ParentClass, _, _, _), KB),
     class_of_individual(Individual, KB, ClassName).
 
-
-%-----------------------------------
-%-----------------------------------
-%-----------------------------------
-% % Desde aqui estoy agregando hoy 11/19/2024 a las 12:09 AM
-
 %-----------------------------------
 %               Punto 2
 %-----------------------------------
-%--------------------------------------------------
-% Añadir Clases y Objetos
-%--------------------------------------------------
+
+%-----------------------------------
+%		INCISO A
+%-----------------------------------
 
 % Añadir una clase
 add_class(ClaseNombre, ClaseMadre, KB, NuevaKB) :-
@@ -545,9 +548,9 @@ add_object(NombreObjeto, ClaseNombre, KB, NuevaKB) :-
         NuevaKB = KB
     ).
 
-%--------------------------------------------------
-% Añadir Propiedades
-%--------------------------------------------------
+%-----------------------------------
+%		INCISO B
+%-----------------------------------
 
 % Añadir una propiedad a una clase
 add_class_property(ClaseNombre, Propiedad, Valor, KB, NuevaKB) :-
@@ -590,9 +593,9 @@ add_object_property(ObjectName, Property, Value, KB, NewKB) :-
 
 
 
-%--------------------------------------------------
-% Añadir Relaciones
-%--------------------------------------------------
+%-----------------------------------
+%		INCISO C
+%-----------------------------------
 
 % Añadir una relación a una clase
 add_class_relation(ClaseNombre, Relacion, ClasesRelacionadas, KB, NuevaKB) :-
@@ -634,8 +637,13 @@ add_object_relation(ObjectName, Relation, RelatedObjects, KB, NewKB) :-
 
 
 
-% Punto 3
-% Crear predicados para eliminar
+%-----------------------------------
+%               Punto 3
+%-----------------------------------
+
+%-----------------------------------
+%		INCISO A
+%-----------------------------------
 
 % Elimina una clase y sus objetos de la base de conocimientos.
 rm_class(ClassName, KB, NewKB) :-
@@ -659,7 +667,9 @@ remove_object_from_class(_, Class, Class).
 has_object_id(ObjectName, [id=>ObjectName | _]).
 
 
-% Elimina una propiedad específica de una clase.
+%-----------------------------------
+%		INCISO B
+%-----------------------------------
 
 rm_class_property(ClassName, Property, KB, NewKB) :-
     maplist(remove_class_property(ClassName, Property), KB, NewKB).
@@ -690,7 +700,9 @@ remove_property_from_object(ObjectName, Property, [id=>ObjectName, Props, Rels],
 remove_property_from_object(_, _, Object, Object). % Si no es el objeto, no se modifica.
 
 
-%  Elimina una relación específica de una clase.
+%-----------------------------------
+%		INCISO C
+%-----------------------------------
 
 rm_class_relation(ClassName, Relation, KB, NewKB) :-
     maplist(remove_class_relation(ClassName, Relation), KB, NewKB).
@@ -722,9 +734,13 @@ remove_relation_from_object(_, _, Object, Object). % Si no es el objeto, no se m
 
 
 
-%--------------------------------------------------
-% Punto 4: Cambiar valores en clases y objetos
-%--------------------------------------------------
+%-----------------------------------
+%               Punto 4
+%-----------------------------------
+
+%-----------------------------------
+%		INCISO A
+%-----------------------------------
 
 
 % Cambiar el nombre de una clase
@@ -761,7 +777,9 @@ update_object_name(_, _, Class, Class). % No modificar si no es la clase objetiv
 rename_object(OldName, NewName, [id=>OldName, Props, Rels], [id=>NewName, Props, Rels]) :- !.
 rename_object(_, _, Object, Object). % No modificar si no es el objeto objetivo.
 
-
+%-----------------------------------
+%		INCISO B
+%-----------------------------------
 
 % Cambiar el valor de una propiedad específica de una clase
 change_value_class_property(ClassName, Property, NewValue, KB, NewKB) :-
@@ -784,10 +802,6 @@ has_property(Property, [Property=>_]).
 
 % Verificar si la negación de la propiedad existe
 has_negated_property(Property, [not(Property)|_]).
-
-
-
-
 
 
 % Cambiar el valor de una propiedad específica de un objeto
@@ -824,7 +838,9 @@ has_property(Property, [Property=>_]).
 % Verificar si la negación de la propiedad existe
 has_negated_property(Property, [not(Property)|_]).
 
-
+%-----------------------------------
+%		INCISO C
+%-----------------------------------
 
 
 % Cambiar con quién mantiene una relación específica una clase
@@ -845,10 +861,6 @@ update_class_relation(_, _, _, Class, Class). % No modificar si no es la clase o
 
 % Verificar si una relación específica existe
 has_relation(Relation, [Relation=>_]).
-
-
-
-
 
 
 % Cambiar con quién mantiene una relación específica un objeto
