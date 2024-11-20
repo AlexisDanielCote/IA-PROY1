@@ -140,9 +140,9 @@ property_extension(Property, KB, Result) :-
             )
         ),
         ResultUnfiltered
-    ),
+    ), filter_list(ResultUnfiltered, ResultUnSort),
     % Procesar ResultUnfiltered para eliminar duplicados: conservar el que tenga 'yes' si hay 'no' para el mismo Id
-    remove_duplicates_with_preference(ResultUnfiltered, Result).
+    remove_duplicates_with_preference(ResultUnSort, Result).
 
 % Predicado auxiliar para verificar la propiedad en la clase actual o en la clase padre si es necesario
 check_property_with_inheritance(Property, Class, ParentClass, KB, Value) :-
@@ -188,6 +188,25 @@ process_values(Values, FinalValue) :-
         ; FinalValue = no % Si todo es 'no', selecciona 'no'
     ).
 
+% Predicado principal
+filter_list(List, Result) :-
+    (   has_other_values(List) ->
+        exclude(yes_no_pair, List, Result)
+    ;   Result = List
+    ).
+
+% Verifica si hay algún valor distinto de 'yes' o 'no'
+has_other_values([]) :- false.
+has_other_values([_:Value | Rest]) :-
+    (   Value \= yes, Value \= no ->
+        true
+    ;   has_other_values(Rest)
+    ).
+
+% Predicado auxiliar para excluir pares con valores 'yes' o 'no'
+yes_no_pair(_Key:Value) :-
+    Value = yes;
+    Value = no.
 
 %Inciso C)
 
@@ -198,26 +217,26 @@ relation_extension(Relation, KB, Result) :-
         (
             % Recorre las clases en KB
             member(class(Class, ParentClass, _, _, Instances), KB),
+            decompose_relation_first(Relation, RelDecomp1),
+            first_element(RelDecomp1, Head1),
             % Busca la propiedad en la jerarquía de clases (padre si es necesario)
             check_relation_with_inheritance_relation(Relation, Class, ParentClass, KB, InitialValue),
             % Para cada instancia, asigna el valor heredado o el valor del atributo
             member([id=>Id, _, Relations], Instances),
-            % Desempaquetar los atributos para buscar la propiedad
-            flatten(Relations, FlatRelations),
-            % Sobrescribir el valor si la propiedad está definida en los atributos de la instancia
-            (   member([Relation=>RelationValue, _], FlatRelations) 
-                -> Value = FlatRelations
+            (   
+                Head1==amigo
+                -> member([AmigoDe=>Amigo, _], Relations), Value=[Amigo]
             ;  
-                member(not(Relation=>RelationValue), FlatRelations) 
-                -> Value = RelationValue
+                Head1==not
+                ->  member([not(AmigoDe=>Amigo), _], Relations), Value=[Amigo]
             ; 
-            Value = [InitialValue]
+                look_ids(InitialValue, KB, IdLook), Value = IdLook
             )
         ),
         ResultUnfiltered
-    ),
+    ), filter_non_empty_lists(ResultUnfiltered, ResultUnSort),
     % Procesar ResultUnfiltered para eliminar duplicados: conservar el que tenga 'yes' si hay 'no' para el mismo Id
-   remove_duplicates_with_preference_relation(ResultUnfiltered, Result), !.
+   remove_duplicates_with_preference_relation(ResultUnSort, Result), !.
 
 
 % Predicado auxiliar para buscar los IDs relacionados con una clase específica
@@ -244,11 +263,9 @@ check_relation_with_inheritance_relation(Relation, Class, ParentClass, KB, Value
     % Verifica si la propiedad está en la lista de propiedades de la clase actual
     (   member(class(Class, _, _, Relationes, _), KB),
         (  member([Relation=>RelationValue, 0], Relationes) % Propiedad afirmativa en la clase actual
-        ->  look_ids(RelationValue, KB, IdLook),
-            Value = IdLook
+        ->  Value = RelationValue
         ;   member([not(Relation=>RelationValue), 0], Relationes) % Propiedad negada en la clase actual
-        ->  look_ids(RelationValue, KB, IdLook),
-            Value = IdLook
+        ->  Value = RelationValue
         ;   % Si no está en la clase actual y hay una clase padre, verifica en la clase padre
             ParentClass \= none,
             check_relation_with_inheritance_relation(Relation, ParentClass, _, KB, Value)
@@ -277,6 +294,36 @@ process_values_relation(Values, FinalValue) :-
         -> FinalValue = [] % Retornar una lista vacía
         ; list_to_set(FilteredValues, [FinalValue|_]) % Si hay valores diferentes, eliminar duplicados y seleccionar el primero
     ).
+
+% Predicado principal para filtrar elementos con listas vacías
+filter_non_empty_lists([], []). % Caso base: lista vacía devuelve lista vacía
+filter_non_empty_lists([Key:Value | Rest], Result) :-
+    (   Value = [] -> % Si el valor es una lista vacía
+        filter_non_empty_lists(Rest, Result) % No lo conservamos
+    ;   Result = [Key:Value | FilteredRest], % Lo conservamos
+        filter_non_empty_lists(Rest, FilteredRest)
+    ).
+% Predicado principal para descomponer la lista
+decompose_relation(Term, Result) :-
+    (   compound(Term), Term = not(Relation) -> % Verifica si es un término compuesto y coincide con not(Relation)
+        decompose_relation(Relation, RelationDecomposed),
+        append([not, '('], RelationDecomposed, Temp), % Agrega 'not(' al inicio
+        append(Temp, [')'], Result)                  % Agrega ')' al final
+    ;   compound(Term), Term = (Left => Right) ->   % Verifica si es una relación =>
+        Result = [Left, '=>', Right]
+    ;   % Caso base para otros términos (no relaciones complejas)
+        Result = [Term]
+    ).
+
+% Predicado principal para descomponer la lista
+decompose_relation_first(Term, Result) :-
+    (   Term = not(Relation) ->
+        Result = [not, '(', Relation, ')']
+    ;   % Caso base para otros términos (no relaciones complejas)
+        Result = [Term]
+    ).
+
+first_element([Head | _], Head).
 
 %inciso d)
 % Predicado principal para encontrar todas las clases a las que pertenece un objeto
