@@ -1,3 +1,48 @@
+?- open_kb('animales.txt',KB),class_extension(animales,KB,Extension_Class).
+KB = [class(top, none, [], [], []), class(animales, top, [], [], []), class(aves, animales, [[vuelan, 0], [not(nadan), 0]], [], []), class(peces, animales, [[nadan, 0], [not(bailan), 0]], [], [[id=>nemo, [], []]]), class(mamiferos, animales, [[not(oviparos), 0]], [], []), class(aguilas, aves, [], [[... => ...|...]], [[... => ...|...]]), class(pinguino, aves, [[...|...]|...], [], [[...|...]]), class(ornitorrincos, mamiferos, [...], [], [])],
+Extension_Class = [pedro, arturo, nemo].
+
+
+?- open_kb('animales.txt',KB),property_extension(vuelan,KB,Extension_Property).
+KB = [class(top, none, [], [], []), class(animales, top, [], [], []), class(aves, animales, [[vuelan, 0], [not(nadan), 0]], [], []), class(peces, animales, [[nadan, 0], [not(bailan), 0]], [], [[id=>nemo, [], []]]), class(mamiferos, animales, [[not(oviparos), 0]], [], []), class(aguilas, aves, [], [[... => ...|...]], [[... => ...|...]]), class(pinguino, aves, [[...|...]|...], [], [[...|...]]), class(ornitorrincos, mamiferos, [...], [], [])],
+Extension_Property = [arturo:no, nemo:no, pedro:yes].
+
+?- open_kb('animales.txt',KB),property_extension(tam,KB,Extension_Property).
+grande
+grande
+KB = [class(top, none, [], [], []), class(animales, top, [], [], []), class(aves, animales, [[vuelan, 0], [not(nadan), 0]], [], []), class(peces, animales, [[nadan, 0], [not(bailan), 0]], [], [[id=>nemo, [], []]]), class(mamiferos, animales, [[not(oviparos), 0]], [], []), class(aguilas, aves, [], [[... => ...|...]], [[... => ...|...]]), class(pinguino, aves, [[...|...]|...], [], [[...|...]]), class(ornitorrincos, mamiferos, [...], [], [])],
+Extension_Property = [pedro:grande].
+
+
+?- open_kb('animales.txt',KB),property_extension(nadan,KB,Extension_Property).
+KB = [class(top, none, [], [], []), class(animales, top, [], [], []), class(aves, animales, [[vuelan, 0], [not(nadan), 0]], [], []), class(peces, animales, [[nadan, 0], [not(bailan), 0]], [], [[id=>nemo, [], []]]), class(mamiferos, animales, [[not(oviparos), 0]], [], []), class(aguilas, aves, [], [[... => ...|...]], [[... => ...|...]]), class(pinguino, aves, [[...|...]|...], [], [[...|...]]), class(ornitorrincos, mamiferos, [...], [], [])],
+Extension_Property = [arturo:yes, nemo:yes, pedro:no].
+
+
+open_kb('animales.txt',KB),relation_extension(comen,KB,Extension_Relation).
+KB = [class(top, none, [], [], []), class(animales, top, [], [], []), class(aves, animales, [[vuelan, 0], [not(nadan), 0]], [], []), class(peces, animales, [[nadan, 0], [not(bailan), 0]], [], [[id=>nemo, [], []]]), class(mamiferos, animales, [[not(oviparos), 0]], [], []), class(aguilas, aves, [], [[... => ...|...]], [[... => ...|...]]), class(pinguino, aves, [[...|...]|...], [], [[...|...]]), class(ornitorrincos, mamiferos, [...], [], [])],
+Extension_Relation = [pedro:[nemo]].
+
+
+?- open_kb('animales.txt',KB),relation_extension(amigo,KB,Extension_Relation).
+KB = [class(top, none, [], [], []), class(animales, top, [], [], []), class(aves, animales, [[vuelan, 0], [not(nadan), 0]], [], []), class(peces, animales, [[nadan, 0], [not(bailan), 0]], [], [[id=>nemo, [], []]]), class(mamiferos, animales, [[not(oviparos), 0]], [], []), class(aguilas, aves, [], [[... => ...|...]], [[... => ...|...]]), class(pinguino, aves, [[...|...]|...], [], [[...|...]]), class(ornitorrincos, mamiferos, [...], [], [])],
+Extension_Relation = [arturo:[pedro]].
+
+
+?- open_kb('animales.txt',KB),relation_extension(not(amigo),KB,Extension_Relation).
+KB = [class(top, none, [], [], []), class(animales, top, [], [], []), class(aves, animales, [[vuelan, 0], [not(nadan), 0]], [], []), class(peces, animales, [[nadan, 0], [not(bailan), 0]], [], [[id=>nemo, [], []]]), class(mamiferos, animales, [[not(oviparos), 0]], [], []), class(aguilas, aves, [], [[... => ...|...]], [[... => ...|...]]), class(pinguino, aves, [[...|...]|...], [], [[...|...]]), class(ornitorrincos, mamiferos, [...], [], [])],
+Extension_Relation = [pedro:[arturo]].
+
+?- open_kb('animales.txt',KB),classes_of_individual(arturo,KB,Classes_of).
+KB = [class(top, none, [], [], []), class(animales, top, [], [], []), class(aves, animales, [[vuelan, 0], [not(nadan), 0]], [], []), class(peces, animales, [[nadan, 0], [not(bailan), 0]], [], [[id=>nemo, [], []]]), class(mamiferos, animales, [[not(oviparos), 0]], [], []), class(aguilas, aves, [], [[... => ...|...]], [[... => ...|...]]), class(pinguino, aves, [[...|...]|...], [], [[...|...]]), class(ornitorrincos, mamiferos, [...], [], [])],
+Classes_of = [animales, aves, pinguino, top].
+
+
+
+
+
+
+
 ?- open_kb('animales.txt',KB),
 |    add_class(gatos,mamiferos,KB,KB1),
 |    add_class_property(gatos,leales,no,KB1,KB2),
