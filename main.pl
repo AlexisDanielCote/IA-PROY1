@@ -432,93 +432,81 @@ class_properties(NombreClase, BaseConocimientos, Propiedades) :-
 
 
 
-%inciso f)
-% Regla para encontrar las relaciones específicas de un individuo en la base de conocimientos.
-relations_of_individual(Individual, KB, Relations) :-
-    findall(
-        Property,
-        (
-            member(class(_, _, _, _, Properties), KB),
-            member([id=>Individual, _, Props], Properties),
-            member([Property, _], Props),
-            append(Props, InitialValue, Result)
-        ),
-        RelationsUnfiltered
-    ),
-    sort(RelationsUnfiltered, Relations).
+% (f) Relaciones de un objeto
+% Predicado principal para obtener las relaciones de un objeto
+relations_of_individual(ObjectName, KB, Relations_Of) :-
+    % Buscar el objeto en las clases y obtener sus relaciones directas
+    member(class(_, _, _, _, Objects), KB),
+    member([id=>ObjectName, _, ObjectRelations], Objects),
+    format_relations(ObjectRelations, FormattedObjectRelations),
 
-% Predicado principal para encontrar todas las clases de un individuo
-class_of_individual(Individual, KB, Classes) :-
-    % Encuentra la clase del individuo
-    member(class(Class, _, _, _, Instances), KB),
-    member(id=>Individual, Instances),
-    % Encuentra todas las clases ascendentes (herencia)
-    find_all_classes(Class, KB, Classes).
+    % Buscar las clases del objeto y obtener sus relaciones heredadas
+    classes_of_individual(ObjectName, KB, Classes),
+    find_class_relations(Classes, KB, ClassRelations),
 
-% Predicado recursivo para encontrar todas las clases heredadas
-find_all_classes(Class, KB, [Class|ParentClasses]) :-
-    member(class(Class, ParentClass, _, _, _), KB),
-    ParentClass \= none, % Si no es la clase raíz
-    find_all_classes(ParentClass, KB, ParentClasses).
-find_all_classes(Class, KB, [Class]) :-
-    member(class(Class, none, _, _, _), KB). % Clase raíz (sin padres)
+    % Combinar relaciones directas y heredadas
+    append(FormattedObjectRelations, ClassRelations, Relations_Of).
 
+% Formatear relaciones del objeto o de las clases
+format_relations([], []).
+format_relations([[not(Relation=>Target), _]|Rest], [not(Relation=>[Target])|FormattedRest]) :-
+    format_relations(Rest, FormattedRest).
+format_relations([[Relation=>Target, _]|Rest], [Relation=>[Target]|FormattedRest]) :-
+    format_relations(Rest, FormattedRest).
 
+% Obtener todas las clases a las que pertenece un objeto
+classes_of_individual(ObjectName, KB, Classes) :-
+    findall(ClassName,
+        (member(class(ClassName, _, _, _, Objects), KB),
+         member([id=>ObjectName, _, _], Objects)),
+        Classes).
 
-% Predicado para encontrar todas las relaciones de una clase
-% Define la regla para encontrar todas las subclases de una clase dada.
-class_relations(Class, KB, Relations) :-
-    findall(
-        Subclass,
-        (member(class(Subclass, Class, _, _, _), KB)),
-        DirectRelations
-    ),
-    findall(
-        SubSubclass,
-        (member(class(SubSubclass, SubclassRelation, _, _, _), KB), 
-         member(class(SubclassRelation, Class, _, _, _), KB)),
-        IndirectRelations
-    ),
-    append(DirectRelations, IndirectRelations, Relations).
+% Obtener relaciones de las clases asociadas a un objeto
+find_class_relations([], _, []).
+find_class_relations([ClassName|Rest], KB, AllRelations) :-
+    member(class(ClassName, _, _, ClassRelations, _), KB),
+    format_relations(ClassRelations, FormattedClassRelations),
+    find_class_relations(Rest, KB, RestRelations),
+    append(FormattedClassRelations, RestRelations, AllRelations).
 
 
-% Predicado auxiliar para encontrar relaciones heredadas de una lista de clases
-find_inherited_relations_f([], _, []).
-find_inherited_relations_f([Class | Rest], KB, Relations) :-
-    class_relations(Class, KB, ClassRelations),
-    find_inherited_relations_f(Rest, KB, RestRelations),
-    append(ClassRelations, RestRelations, Relations).
 
-% Predicado para encontrar todas las clases a las que pertenece un objeto
-classes_of_individual_f(Object, KB, Classes) :-
-    findall(
-        Class,
-        (
-            member(class(Class, _, _, _, Instances), KB),
-            member([id=>Object | _], Instances)
-        ),
-        DirectClasses
-    ),
-    find_superclasses_list_f(DirectClasses, KB, AllClasses),
-    sort(AllClasses, Classes). % Elimina duplicados y ordena
 
-% Predicado auxiliar para encontrar las superclases de una lista de clases
-find_superclasses_list_f([], _, []).
-find_superclasses_list_f([Class | Rest], KB, [Class | SuperClasses]) :-
-    find_superclasses_f(Class, KB, ClassSuperClasses),
-    find_superclasses_list_f(Rest, KB, RestSuperClasses),
-    append(ClassSuperClasses, RestSuperClasses, SuperClasses),
-    !. % Corte para evitar seguir buscando
 
-% Predicado auxiliar para encontrar las superclases de una clase de forma recursiva
-find_superclasses_f(Class, KB, SuperClasses) :-
-    member(class(Class, SuperClass, _, _, _), KB),
-    SuperClass \= none,
-    find_superclasses_f(SuperClass, KB, ParentSuperClasses),
-    SuperClasses = [SuperClass | ParentSuperClasses],
-    !. % Corte para evitar seguir buscando
 
-find_superclasses_f(_, _, []).
+
+
+% --------------------------------------------------
+% Relaciones de una clase
+% --------------------------------------------------
+
+% Obtener todas las relaciones de una clase (directas e indirectas)
+class_relations(ClassName, KB, AllRelations) :-
+    findall(Relation, class_relation(ClassName, Relation, KB), Relations),
+    list_to_set(Relations, AllRelations).
+
+% Relaciones directas o heredadas de una clase
+class_relation(ClassName, Relation, KB) :-
+    member(class(ClassName, ParentClass, _, Relations, _), KB),
+    (
+        member(Relation, Relations)  % Relaciones directas
+    ;
+        ParentClass \= none,         % Relaciones heredadas
+        class_relation(ParentClass, Relation, KB)
+    ).
+
+% --------------------------------------------------
+% Clases de un individuo
+% --------------------------------------------------
+
+% Obtener clases directas e indirectas de un individuo
+class_of_individual(Individual, KB, ClassName) :-
+    member(class(ClassName, _, _, _, Objects), KB),
+    member([id=>Individual, _, _], Objects).
+class_of_individual(Individual, KB, ParentClass) :-
+    member(class(ClassName, ParentClass, _, _, _), KB),
+    class_of_individual(Individual, KB, ClassName).
+
 
 %-----------------------------------
 %-----------------------------------
