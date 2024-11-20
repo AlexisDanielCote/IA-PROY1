@@ -357,66 +357,79 @@ find_superclasses(Class, KB, SuperClasses) :-
 
 find_superclasses(_, _, []).
 
-%inciso e)
-% Obtener todas las propiedades de un individuo
-properties_of_individual(Individual, KB, Result) :-
-    member(class(ClassName, ClassParent, _, _, _), KB),
-    % Buscar la clase que contiene al individuo
-    member(class(ClassName, _, _, _, Instances), KB),
-    % Verificar si el individuo tiene una lista de propiedades definida
-    member([id=>Individual, IndividualProps,_], Instances),
-    (
-        % Caso 1: El individuo tiene una lista de propiedades definida
-        IndividualProps \= [] ->
-        findall(Prop, member([Prop, _], IndividualProps), ResultF)
-    ), class_properties_indi(ClassName, ClassParent, KB, ResultF, Result1), 
-    clean_properties(Result1, Result),!.
-    
-% Obtener todas las propiedades de una clase (incluidas las de las superclases)
-class_properties_indi(ClassName, SuperClass, KB, ResultF, Result) :-
-    % Encontrar la definición de la clase
-    member(class(ClassName, SuperClass, ClassProps, _, _), KB),
-    write(ClassProps), 
-    (
-        ClassProps \= [] -> append(ClassProps, ResultF, Result)
-        %write(CurrentProps), nl
-        ;
-        % Extraer propiedades de la clase actual
-        findall(Prop, member([Prop, _], ClassProps), CurrentProps),
-        write(CurrentProps),
-        % Recursivamente obtener las propiedades de las superclases
-        ->(
-            SuperClass \= none ->
-            class_properties_indi(SuperClass, _, KB, ResultF, SuperProps);
-            SuperProps = []
-        )
-    ).
-    % Combinar propiedades actuales con las heredadas
-   
-% Predicado para limpiar la lista de propiedades y eliminar los números
-clean_properties([], []). % Caso base: lista vacía
-clean_properties([[Prop, _] | Tail], [Prop | CleanTail]) :- % Eliminar números de cada propiedad
-    clean_properties(Tail, CleanTail).
-clean_properties([Prop | Tail], [Prop | CleanTail]) :- % Si ya es una propiedad limpia, conservarla
-    clean_properties(Tail, CleanTail).
 
-% Obtener todas las propiedades de una clase (incluidas las de las superclases)
-class_properties(ClassName, KB, Result) :-
-    % Buscar la clase actual
-    member(class(ClassName, SuperClass, ClassProps, _, _), KB),
-    % Extraer propiedades de la clase actual
-    findall(Prop, member([Prop, _], ClassProps), CurrentProps),
+% (e) Propiedades de un Objeto
+% Obtener todas las propiedades de un individuo (directas e indirectas)
+properties_of_individual(Individual, KB, SimplifiedProperties) :-
+    % Propiedades directas del individuo
+    findall(Prop, direct_object_property(Individual, Prop, KB), DirectProperties),
+    % Clases a las que pertenece el individuo
+    findall(Class, class_of_individual(Individual, KB, Class), Classes),
+    % Propiedades heredadas de las clases
+    findall(Prop, (member(Class, Classes), class_property(Class, Prop, KB)), InheritedProperties),
+    % Combinar propiedades directas e indirectas
+    append(DirectProperties, InheritedProperties, AllProperties),
+    % Simplificar propiedades (eliminar conflictos y duplicados)
+    simplify_properties(AllProperties, SimplifiedProperties).
+
+% Propiedades directas de un objeto
+direct_object_property(Individual, Property, KB) :-
+    member(class(_, _, _, _, Objects), KB),
+    member([id=>Individual, Props, _], Objects),
     (
-        % Caso 1: La clase tiene una superclase
-        SuperClass \= none ->
-        class_properties(SuperClass, KB, SuperProps),
-        append(SuperProps, CurrentProps, CombinedProps),
-        % Quitar números de las propiedades combinadas
-        clean_properties(CombinedProps, Result)
+        member([Property=>_], Props) -> Property = Property ;
+        member(not(Property), Props) -> Property = not(Property) ;
+        member(Property, Props)
+    ).
+
+% Propiedades de una clase (incluye las propiedades directas de la clase y sus ancestros)
+class_property(ClassName, Property, KB) :-
+    member(class(ClassName, ParentClass, Properties, _, _), KB),
+    (
+        member([Property=>_], Properties) -> Property = Property ;
+        member(not(Property), Properties) -> Property = not(Property) ;
+        member(Property, Properties)
     ;
-        % Caso 2: No hay superclase, devolver solo las propiedades actuales
-        clean_properties(CurrentProps, Result)
-    ), !.
+        % Buscar en la clase padre
+        ParentClass \= none,
+        class_property(ParentClass, Property, KB)
+    ).
+
+% Clases a las que pertenece un individuo (incluye herencia)
+class_of_individual(Individual, KB, ClassName) :-
+    member(class(ClassName, _, _, _, Objects), KB),
+    member([id=>Individual, _, _], Objects).
+class_of_individual(Individual, KB, ParentClass) :-
+    member(class(ClassName, ParentClass, _, _, _), KB),
+    class_of_individual(Individual, KB, ClassName).
+
+% Simplificar propiedades eliminando conflictos y duplicados
+simplify_properties(Properties, SimplifiedProperties) :-
+    maplist(standardize_property, Properties, Standardized),
+    list_to_set(Standardized, UniqueProperties),
+    exclude(conflicting_property(UniqueProperties), UniqueProperties, SimplifiedProperties).
+
+% Estandarizar propiedades al formato simple
+standardize_property([Property, _], Property).
+standardize_property(Property, Property).
+
+% Verificar si una propiedad entra en conflicto
+conflicting_property(Properties, Property) :-
+    Property = not(Key),
+    member(Key, Properties).
+conflicting_property(Properties, Property) :-
+    member(not(Property), Properties).
+
+
+% (e) Propiedades de una Clase
+% class_properties(+NombreClase, +BaseConocimientos, -Propiedades)
+% Obtiene todas las propiedades de una clase en la base de conocimientos
+class_properties(NombreClase, BaseConocimientos, Propiedades) :-
+    % Buscar la clase específica en la base de conocimientos
+    member(class(NombreClase, _, PropiedadesClase, _, _), BaseConocimientos),
+    % Extraer las propiedades de la clase
+    Propiedades = PropiedadesClase.
+
 
 
 %inciso f)
